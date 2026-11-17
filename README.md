@@ -24,14 +24,25 @@
 - 콘센트 자리 표시, 구역별(창가 바, 2인석 등) 빈자리 수를 보여줍니다.
 - 시트에는 **시간, 좌석 번호, 입장/퇴장**만 기록됩니다. 이름이나 전화번호 같은 개인정보는 받지 않아요.
 
-## 설치 (20분)
+## 쓰는 도구는 세 가지뿐
 
-그림으로 된 안내서가 있어요. 저장소를 내려받은 뒤 **[docs/설치가이드.html](docs/설치가이드.html)** 을 브라우저로 여세요. 코드 복사 버튼이 들어 있습니다.
+| 도구 | 하는 일 |
+| --- | --- |
+| **구글 시트 + Apps Script** | 손님 기록을 쌓고, 입장 · 퇴장 · 좌석 현황 화면을 띄움 (사장님 구글 계정) |
+| [`tools/seat-editor.html`](tools/seat-editor.html) | 좌석 배치 편집기. 우리 카페 구역 · 좌석 수를 클릭으로 만들어 코드에 붙여넣을 설정을 만듦 |
+| [`tools/qr-maker.html`](tools/qr-maker.html) | 웹 앱 주소로 입장 · 퇴장 · 좌석 현황 QR 세 장을 인쇄용으로 만듦 |
+
+두 도구는 내려받은 폴더에서 더블클릭하면 브라우저로 열리고, 인터넷 없이 동작합니다. 둘 다 한국어 / English 전환이 돼요.
+
+## 설치 (20~30분)
+
+그림으로 된 안내서가 있어요. 저장소를 내려받은 뒤 **[docs/설치가이드.html](docs/설치가이드.html)** 을 브라우저로 여세요. 코드 복사 버튼이 들어 있습니다. (English: [docs/SETUP_EN.html](docs/SETUP_EN.html))
 
 간단히 요약하면 이렇습니다.
 
 1. **구글 시트 만들기**: 사장님 계정으로 [sheets.new](https://sheets.new)
 2. **코드 붙여넣기**: 시트에서 확장 프로그램 → Apps Script → [`apps-script/Code.gs`](apps-script/Code.gs) 내용 전체를 붙여넣고 저장
+   - **좌석 배치**: [`tools/seat-editor.html`](tools/seat-editor.html)에서 우리 카페 좌석을 만들고 **복사** → 코드의 `설정 시작` ~ `설정 끝` 부분을 바꿔치기 → 저장
 3. **웹 앱 배포**: 배포 → 새 배포 → 웹 앱 → 실행: **나**, 액세스: **모든 사용자** → 권한 승인 → `/exec` 주소 복사
 4. **QR 만들기**: [`tools/qr-maker.html`](tools/qr-maker.html) 을 열고 주소를 붙여넣으면 입장 · 퇴장 · 좌석 현황 QR 세 장이 나옵니다 (인터넷 없이 동작)
 5. **확인**: 휴대폰으로 입장 QR을 찍어 자리에 앉고, 좌석 현황 화면에서 바뀌는지 확인
@@ -73,12 +84,13 @@
 ```
 apps-script/Code.gs       구글 Apps Script 코드 (이것 하나만 붙여넣으면 됨)
 docs/설치가이드.html        그림으로 보는 설치 안내 (한국어)
+docs/SETUP_EN.html        Illustrated setup guide (English)
 docs/커스터마이즈.md        이름 · 좌석 배치 · 기준 바꾸기
 docs/SETUP_EN.md          English setup guide
 docs/CUSTOMIZE_EN.md      English customization guide
 docs/images/              화면 예시
 tools/seat-editor.html    좌석 배치 편집기 (오프라인, 한/영)
-tools/qr-maker.html       QR 세 장 만들기 (오프라인)
+tools/qr-maker.html       QR 세 장 만들기 (오프라인, 한/영)
 tools/qrcode.js           QR 생성 라이브러리 (Kazuhiko Arase, MIT)
 ```
 

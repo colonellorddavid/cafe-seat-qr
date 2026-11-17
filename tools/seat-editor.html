@@ -159,6 +159,7 @@ var S = { cafe: '우리 카페', stay: 90, calm: 40, busy: 75, zones: [
   { name: '소파', note: '대화 많음', seats: 2, outlet: 0 }
 ]};
 try { var saved = JSON.parse(localStorage.getItem('seatEditor') || 'null'); if (saved && saved.zones) S = saved; lang = localStorage.getItem('seatEditorLang') || 'ko'; } catch (e) {}
+var qlang = (location.search.match(/[?&]lang=(ko|en)/) || [])[1]; if (qlang) lang = qlang;
 function save(){ try { localStorage.setItem('seatEditor', JSON.stringify(S)); localStorage.setItem('seatEditorLang', lang); } catch (e) {} }
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }

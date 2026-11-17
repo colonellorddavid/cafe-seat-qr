@@ -18,6 +18,7 @@ input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8p
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 button{border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff}
 button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.lang{display:flex;gap:4px;background:var(--line);padding:3px;border-radius:9px}.lang button{background:transparent;color:var(--muted);padding:5px 12px;font-size:13px;border-radius:7px}.lang button.on{background:var(--card);color:var(--fg)}
 .err{color:#C0392B;font-weight:600;min-height:1.2em}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:20px}
 .card{background:#fff;color:#1C2420;border:1px solid #D6DDD5;border-radius:16px;padding:22px 18px;text-align:center;break-inside:avoid}
@@ -31,44 +32,58 @@ button.ghost{background:transparent;color:var(--accent);border:1px solid var(--a
 </head>
 <body>
 <div class="wrap">
-<h1>QR 만들기</h1>
-<p class="sub">배포한 웹 앱 주소(/exec로 끝나는 주소)를 붙여넣으면 입장, 퇴장, 좌석 현황 QR 세 장이 만들어집니다. 인터넷 없이도 동작하고, 주소는 이 컴퓨터 밖으로 보내지 않아요.</p>
+<div class="row noprint" style="justify-content:space-between;align-items:flex-start"><div><h1 data-t="title"></h1><p class="sub" data-t="lead"></p></div><div class="lang"><button id="lk">한국어</button><button id="le">English</button></div></div>
 <div class="form">
-  <label for="url">웹 앱 주소</label>
+  <label for="url" data-t="url"></label>
   <input id="url" placeholder="https://script.google.com/macros/s/..../exec" autocomplete="off">
-  <label for="cafe">카페 이름 (QR 카드에 표시, 선택)</label>
-  <input id="cafe" placeholder="예: 우리 카페">
+  <label for="cafe" data-t="cafe"></label>
+  <input id="cafe">
   <div class="err" id="err"></div>
-  <div class="row"><button id="go">QR 만들기</button><button class="ghost" id="print" hidden>인쇄하기</button></div>
+  <div class="row"><button id="go" data-t="go"></button><button class="ghost" id="print" hidden data-t="print"></button></div>
 </div>
 <div class="cards" id="cards"></div>
-<p class="sub noprint" id="hint" hidden>QR 위에서 마우스 오른쪽 클릭 → "이미지를 다른 이름으로 저장"은 SVG라 안 될 수 있어요. 인쇄하기 → "PDF로 저장"을 쓰면 편합니다.</p>
+<p class="sub noprint" id="hint" hidden data-t="hint"></p>
 </div>
 <script src="qrcode.js"></script>
 <script>
-var KINDS = [
-  { q: '?p=in',  title: '입장',      desc: 'QR을 찍고 빈자리를 눌러 앉으세요', where: '테이블 · 입구에 붙이기' },
-  { q: '?p=out', title: '퇴장',      desc: '나가실 때 찍고 내 자리를 비워주세요', where: '출구 · 반납대에 붙이기' },
-  { q: '',       title: '좌석 현황', desc: '빈자리와 혼잡도를 실시간으로 확인하세요', where: '홈페이지 · SNS · 매장 밖 안내판' }
-];
+var T = {
+  ko: { title: 'QR 만들기', lead: '배포한 웹 앱 주소(/exec로 끝나는 주소)를 붙여넣으면 입장, 퇴장, 좌석 현황 QR 세 장이 만들어집니다. 인터넷 없이도 동작하고, 주소는 이 컴퓨터 밖으로 보내지 않아요.',
+    url: '웹 앱 주소', cafe: '카페 이름 (QR 카드에 표시, 선택)', cafePh: '예: 우리 카페', go: 'QR 만들기', print: '인쇄하기',
+    hint: '인쇄하기 → "PDF로 저장"을 고르면 파일로 보관할 수 있어요.', err: '주소가 https://script.google.com/macros/s/…/exec 모양인지 확인해 주세요.',
+    kinds: [['입장', 'QR을 찍고 빈자리를 눌러 앉으세요', '테이블 · 입구에 붙이기'], ['퇴장', '나가실 때 찍고 내 자리를 비워주세요', '출구 · 반납대에 붙이기'], ['좌석 현황', '빈자리와 혼잡도를 실시간으로 확인하세요', '홈페이지 · SNS · 매장 밖 안내판']] },
+  en: { title: 'QR maker', lead: 'Paste your web app URL (the one ending in /exec) to get three QR codes: check in, check out and live seat map. Works offline; the URL never leaves this computer.',
+    url: 'Web app URL', cafe: 'Cafe name (shown on the QR cards, optional)', cafePh: 'e.g. Our Cafe', go: 'Make QR codes', print: 'Print',
+    hint: 'Print → "Save as PDF" keeps them as a file.', err: 'Check that the URL looks like https://script.google.com/macros/s/…/exec',
+    kinds: [['Check in · 입장', 'Scan, then tap a free seat to sit', 'Tables · entrance'], ['Check out · 퇴장', 'Scan when you leave to free your seat', 'Exit · tray return'], ['Live seats · 좌석 현황', 'See free seats and how busy we are', 'Website · social media · sign outside']] }
+};
+var QS = ['?p=in', '?p=out', ''];
+var lang = /[?&]lang=en/.test(location.search) ? 'en' : 'ko';
+function applyLang(){
+  var L = T[lang]; document.documentElement.lang = lang; document.title = L.title;
+  document.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = L[el.getAttribute('data-t')]; });
+  document.getElementById('cafe').placeholder = L.cafePh;
+  document.getElementById('lk').className = lang === 'ko' ? 'on' : ''; document.getElementById('le').className = lang === 'en' ? 'on' : '';
+  if (document.getElementById('cards').innerHTML) make();
+}
 function qrSvg(text){ var qr = qrcode(0, 'M'); qr.addData(text); qr.make(); return qr.createSvgTag({ cellSize: 6, margin: 4, scalable: true }); }
 function esc(s){ return s.replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
-document.getElementById('go').onclick = function(){
-  var raw = document.getElementById('url').value.trim(), err = document.getElementById('err');
+function make(){
+  var raw = document.getElementById('url').value.trim(), err = document.getElementById('err'), L = T[lang];
   var base = raw.split('?')[0].split('#')[0];
-  if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(base)) {
-    err.textContent = '주소가 https://script.google.com/macros/s/…/exec 모양인지 확인해 주세요.';
-    return;
-  }
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(base)) { err.textContent = L.err; return; }
   err.textContent = '';
   var cafe = esc(document.getElementById('cafe').value.trim());
-  document.getElementById('cards').innerHTML = KINDS.map(function(k){
-    return '<div class="card">' + (cafe ? '<div class="cafe">' + cafe + '</div>' : '') + '<h2>' + k.title + '</h2><p>' + k.desc + '</p><div class="qr">' + qrSvg(base + k.q) + '</div><div class="where">' + k.where + '</div></div>';
+  document.getElementById('cards').innerHTML = L.kinds.map(function(k, i){
+    return '<div class="card">' + (cafe ? '<div class="cafe">' + cafe + '</div>' : '') + '<h2>' + k[0] + '</h2><p>' + k[1] + '</p><div class="qr">' + qrSvg(base + QS[i]) + '</div><div class="where">' + k[2] + '</div></div>';
   }).join('');
   document.getElementById('print').hidden = false;
   document.getElementById('hint').hidden = false;
-};
+}
+document.getElementById('go').onclick = make;
+document.getElementById('lk').onclick = function(){ lang = 'ko'; applyLang(); };
+document.getElementById('le').onclick = function(){ lang = 'en'; applyLang(); };
 document.getElementById('print').onclick = function(){ window.print(); };
+applyLang();
 </script>
 </body>
 </html>

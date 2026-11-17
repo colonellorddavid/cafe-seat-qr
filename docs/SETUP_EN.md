@@ -1,6 +1,6 @@
 # Setup guide
 
-[한국어 그림 안내](설치가이드.html) | **English**
+[Illustrated version](SETUP_EN.html) · [한국어 그림 안내](설치가이드.html) | **English**
 
 You need one Google account (ideally the cafe owner's) and about 20 minutes. Google menu names below are the English UI; the Korean UI name is in brackets.
 
@@ -33,9 +33,9 @@ You do not need a Google Form. The code creates a tab called **좌석기록** (s
 
 ## 4. Make the QR codes
 
-1. Open [`tools/qr-maker.html`](../tools/qr-maker.html) by double-clicking it (it works offline; the URL never leaves your computer).
-2. Paste the web app URL, optionally add the cafe name, and click **QR 만들기** (Make QR).
-3. Click **인쇄하기** (Print) → *Save as PDF* or print.
+1. Open [`tools/qr-maker.html`](../tools/qr-maker.html) by double-clicking it and choose **English** at the top (it works offline; the URL never leaves your computer).
+2. Paste the web app URL, optionally add the cafe name, and click **Make QR codes**.
+3. Click **Print** → *Save as PDF* or print.
 
 | QR | URL | Where to put it |
 | --- | --- | --- |

@@ -67,13 +67,41 @@ a.lnk{color:#1A73E8;text-decoration:underline}
 .menu .click::after{top:50%;left:auto;right:-72px;transform:translateY(-50%)}
 .done{background:#E6F4EA;color:#137333;border-radius:12px;padding:16px;font-weight:600}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .done{background:#1E3A2A;color:#81C995}}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:14px}
+.tool{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.tool .ic{font-size:26px;line-height:1}
+.tool h3{margin:8px 0 4px;font-size:16px}
+.tool p{margin:0;font-size:14px;color:var(--muted)}
+.tool code{font-size:12px}
+.shot{width:100%;border:1px solid var(--line);border-radius:12px;display:block;margin-top:10px}
+.lang{float:right;font-size:14px}
+.lang a{color:var(--blue)}
+.code .set{background:#E8F0FE;outline:2px dashed #1A73E8;display:block;padding:4px 6px;margin:2px 0;border-radius:4px}
+.flow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;font-size:14px}
+.flow span.b{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+table.t{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+table.t th{text-align:left;padding:6px;border-bottom:1px solid var(--line)}
+table.t td{padding:6px;border-bottom:1px solid var(--line)}
 </style>
 </head>
 <body>
 <div class="wrap">
+<p class="lang"><b>한국어</b> | <a href="SETUP_EN.html">English</a></p>
 <h1>QR 좌석 체크인 설치하기</h1>
-<p class="sub">그림 속 <b style="color:var(--hi)">빨간 테두리</b>가 누를 곳입니다. 구글 계정 하나로 20분이면 끝나요. 비용은 들지 않습니다.</p>
-<div class="toc"><a href="#p1">① 시트 만들기</a><a href="#p2">② 코드 붙여넣기</a><a href="#p3">③ 웹 앱 배포</a><a href="#p4">④ QR 만들기</a><a href="#p5">⑤ 확인과 운영</a></div>
+<p class="sub">그림 속 <b style="color:var(--hi)">빨간 테두리</b>가 누를 곳입니다. 구글 계정 하나로 20~30분이면 끝나요. 비용은 들지 않습니다.</p>
+<div class="toc"><a href="#p0">⓪ 준비물</a><a href="#p1">① 시트 만들기</a><a href="#p2">② 코드 붙여넣기 · 좌석 배치</a><a href="#p3">③ 웹 앱 배포</a><a href="#p4">④ QR 만들기</a><a href="#p5">⑤ 확인과 운영</a></div>
+
+<section class="part" id="p0">
+<h2><span class="badge" style="background:var(--muted)">0</span>쓰는 도구는 세 가지뿐</h2>
+<p>설치할 프로그램은 없어요. 저장소를 내려받아 압축을 풀면 <code>tools</code> 폴더에 도구 두 개가 들어 있고, 더블클릭하면 브라우저에서 열립니다. 둘 다 인터넷 없이 동작하고, 입력한 내용을 어디에도 보내지 않아요.</p>
+<div class="tools">
+<div class="tool"><div class="ic">▦</div><h3>구글 시트 + Apps Script</h3><p>손님 기록이 쌓이고, 손님 화면(입장 · 퇴장 · 좌석 현황)을 띄우는 곳. 사장님 구글 계정에서 만듭니다. <b>1~3단계</b></p></div>
+<div class="tool"><div class="ic">🪑</div><h3>좌석 배치 편집기</h3><p><code>tools/seat-editor.html</code><br>우리 카페 구역과 좌석 수를 클릭으로 만들어 코드에 붙여넣을 설정을 만들어 줍니다. <b>2-3단계</b></p></div>
+<div class="tool"><div class="ic">▣</div><h3>QR 만들기</h3><p><code>tools/qr-maker.html</code><br>웹 앱 주소를 넣으면 입장 · 퇴장 · 좌석 현황 QR 세 장을 인쇄용으로 만들어 줍니다. <b>4단계</b></p></div>
+</div>
+<div class="tip">💡 내려받기: GitHub 저장소 페이지 위쪽 초록색 <b>Code</b> 버튼 → <b>Download ZIP</b> → 압축 풀기.</div>
+</section>
+
 <section class="part" id="p1">
 <h2><span class="badge" style="background:var(--green)">1</span>구글 시트 만들기</h2>
 <div class="step">
@@ -86,10 +114,9 @@ a.lnk{color:#1A73E8;text-decoration:underline}
 <div class="tip">💡 구글 폼은 필요 없어요. 손님 기록은 코드가 이 시트 안에 <b>좌석기록</b> 탭을 만들어 저장합니다.</div>
 </div>
 </section>
-<!-- PART 3 -->
-<section class="part" id="p2">
-<h2><span class="badge" style="background:#F9AB00">2</span>시트에 코드 붙여넣기</h2>
 
+<section class="part" id="p2">
+<h2><span class="badge" style="background:#F9AB00">2</span>코드 붙여넣기와 좌석 배치</h2>
 <div class="step">
 <h3><span class="n">2-1</span>확장 프로그램 → Apps Script</h3>
 <p>1단계에서 만든 <b>구글 시트</b> 화면 위쪽 메뉴에서 <b>확장 프로그램</b> → <b>Apps Script</b>를 누르세요.</p>
@@ -360,13 +387,23 @@ setInterval(poll, 5000);
 &lt;/script&gt;
 &lt;/body&gt;&lt;/html&gt;`;
 </pre></div>
-<div class="tip">💡 맨 위 <code>CAFE_NAME</code>에 카페 이름을 넣으세요. 좌석 배치는 <code>tools/seat-editor.html</code>(좌석 배치 편집기)로 클릭해서 만든 뒤 <code>설정 시작</code> ~ <code>설정 끝</code> 사이에 붙여넣으면 돼요. 처음엔 그대로 두고 동작부터 확인해도 됩니다.</div>
+<div class="tip">💡 이 코드에는 예시 좌석 배치(40석)가 들어 있어요. 우리 카페에 맞게 바꾸는 건 바로 다음 2-3에서 합니다.</div>
+</div>
+
+<div class="step">
+<h3><span class="n">2-3</span>좌석 배치 편집기로 우리 카페 좌석 만들기</h3>
+<p><span class="n">①</span><code>tools/seat-editor.html</code>을 더블클릭해서 여세요. 카페 이름, 구역(창가 바, 2인석 같은 좌석 묶음), 구역별 좌석 수와 콘센트 자리 수를 넣으면 오른쪽에 손님 화면 미리보기가 바로 바뀝니다. 좌석 번호는 위 구역부터 1번으로 자동으로 매겨져요.</p>
+<img class="shot" src="images/seat-editor.png" alt="좌석 배치 편집기 화면">
+<p style="margin-top:14px"><span class="n">②</span>다 만들었으면 아래쪽 <b>4 코드에 붙여넣기</b> 칸의 파란 <b>복사</b> 버튼을 누르세요.</p>
+<p><span class="n">③</span>Apps Script 편집기로 돌아가 <code>// ===== 설정 시작</code> 줄부터 <code>// ===== 설정 끝</code> 줄까지를 마우스로 끌어서 선택하고, <b>Ctrl+V</b>로 붙여넣어 바꿔치기하세요. 그다음 <b>💾 저장</b>.</p>
+<div class="scr"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">script.google.com/…/edit · Code.gs</span></div>
+<div class="body"><div class="code"><span style="color:#5f6368">/** cafe-seat-qr … */</span><span class="set"><b>// ===== 설정 시작 (SETTINGS START) =====</b><br>const CAFE_NAME = '…';<br>const STAY_MIN = 90;<br>const ZONES = [ … ];<br><b>// ===== 설정 끝 (SETTINGS END) =====</b></span><span style="color:#1A73E8;font-weight:700">↑ 파란 점선 부분만 선택 → 편집기에서 복사한 설정으로 붙여넣기. 아래쪽 코드는 그대로</span><br>const LOG = '좌석기록';<br>function doGet(e) { …</div></div></div>
+<div class="tip">💡 지금 정하기 어렵다면 건너뛰고 예시 배치로 먼저 동작을 확인해도 돼요. 나중에 바꿀 때는 같은 방법으로 붙여넣고 저장한 뒤, 5-2의 <b>"코드를 고친 뒤"</b>처럼 새 버전으로 배포하면 QR은 그대로 쓸 수 있습니다.<br>💡 이미 쓰던 설정을 고치려면 편집기 아래 <b>"이미 쓰던 설정 불러오기"</b>에 지금 코드의 설정 부분을 붙여넣으세요.</div>
 </div>
 </section>
-<!-- PART 4 -->
+
 <section class="part" id="p3">
 <h2><span class="badge" style="background:var(--blue)">3</span>웹 앱으로 배포</h2>
-
 <div class="step">
 <h3><span class="n">3-1</span>배포 → 새 배포</h3>
 <p>코드 편집기 오른쪽 위 파란 <b>배포</b> 버튼 → <b>새 배포</b>를 누르세요.</p>
@@ -375,7 +412,6 @@ setInterval(poll, 5000);
 <div class="row" style="justify-content:flex-end;margin-top:6px"><div class="menu"><div class="on">새 배포</div><div>배포 관리</div><div>배포 테스트</div></div></div>
 </div></div>
 </div>
-
 <div class="step">
 <h3><span class="n">3-2</span>톱니바퀴 → 웹 앱 고르고 설정</h3>
 <p>창 왼쪽 <b>유형 선택</b> 옆 <b>⚙ 톱니바퀴</b>를 누르고 <b>웹 앱</b>을 고르세요. 그다음 설정을 아래처럼 맞추고 <b>배포</b>를 누르세요.</p>
@@ -389,7 +425,6 @@ setInterval(poll, 5000);
 </div></div>
 <div class="tip">⚠️ <b>액세스 권한</b>은 꼭 <b>"모든 사용자"</b>여야 해요. "Google 계정이 있는 모든 사용자"나 "나만"으로 두면 손님 휴대폰에서 안 열립니다.</div>
 </div>
-
 <div class="step">
 <h3><span class="n">3-3</span>권한 승인 (처음 한 번만)</h3>
 <p><b>액세스 승인</b> → 내 구글 계정 선택 순서로 누르세요. 그러면 <b>"Google에서 확인하지 않은 앱"</b> 경고가 나오는데, 내가 만든 코드라서 그런 것이니 괜찮습니다.</p>
@@ -405,45 +440,60 @@ setInterval(poll, 5000);
 </div></div>
 <div class="tip">💡 코드는 이 시트 안의 <b>좌석기록</b> 탭만 읽고 씁니다. 다른 파일이나 메일은 건드리지 않아요.</div>
 </div>
-
 <div class="step">
 <h3><span class="n">3-4</span>웹 앱 URL 복사</h3>
-<p style="overflow-wrap:anywhere">"배포를 업데이트했습니다" 창이 뜨면 <b>웹 앱</b> 아래 주소 옆 <b>복사</b>를 누르세요. 주소는 <code>https://script.google.com/macros/s/…/exec</code> 모양이에요.</p>
+<p style="overflow-wrap:anywhere">"새 배포" 완료 창이 뜨면 <b>웹 앱</b> 아래 주소 옆 <b>복사</b>를 누르세요. 주소는 <code>https://script.google.com/macros/s/…/exec</code> 모양이에요. 4단계에서 씁니다.</p>
 <div class="scr"><div class="body" style="background:rgb(0 0 0/.35)">
 <div class="dlg"><h4>새 배포 ✓</h4>
 <div class="lbl">배포 ID</div><div class="field" style="color:#9aa0a6">AKfycb…</div>
 <div class="lbl">웹 앱</div><div class="row"><div class="field" style="flex:1;margin:0;overflow:hidden;white-space:nowrap">https://script.google.com/macros/s/AKfy…/exec</div><span class="click"><span class="btn hl">복사</span></span></div>
 <div class="row" style="justify-content:flex-end;margin-top:10px"><span class="btn blue">완료</span></div></div>
 </div></div>
-<p style="overflow-wrap:anywhere">복사한 주소를 새 탭에 붙여넣어 보세요. <b>좌석 배치도와 "한산 · 0명"</b>이 보이면 배포 성공입니다. 시트 아래쪽에 <b>좌석기록</b> 탭도 자동으로 생겨요.</p>
+<p style="overflow-wrap:anywhere">복사한 주소를 새 탭에 붙여넣어 보세요. <b>좌석 배치도와 "한산"</b>이 보이면 배포 성공입니다. 시트 아래쪽에 <b>좌석기록</b> 탭도 자동으로 생겨요.</p>
 </div>
 </section>
+
 <section class="part" id="p4">
 <h2><span class="badge" style="background:var(--purple)">4</span>QR 세 장 만들기</h2>
 <div class="step">
-<p>저장소의 <code>tools/qr-maker.html</code>을 더블클릭해서 여세요. 3-4에서 복사한 웹 앱 주소를 붙여넣고 <b>QR 만들기</b>를 누르면 세 장이 나옵니다. <b>인쇄하기</b> → "PDF로 저장"으로 보관하거나 바로 인쇄하세요.</p>
-<img src="images/qr-maker.png" alt="QR 만들기 화면" style="width:100%;max-width:720px;border:1px solid var(--line);border-radius:12px;display:block;margin-top:10px">
-<table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:14px">
-<tr><th style="text-align:left;padding:6px;border-bottom:1px solid var(--line)">QR</th><th style="text-align:left;padding:6px;border-bottom:1px solid var(--line)">주소</th><th style="text-align:left;padding:6px;border-bottom:1px solid var(--line)">붙일 곳</th></tr>
-<tr><td style="padding:6px">입장</td><td style="padding:6px"><code>…/exec?p=in</code></td><td style="padding:6px">테이블, 입구</td></tr>
-<tr><td style="padding:6px">퇴장</td><td style="padding:6px"><code>…/exec?p=out</code></td><td style="padding:6px">출구, 반납대</td></tr>
-<tr><td style="padding:6px">좌석 현황</td><td style="padding:6px"><code>…/exec</code></td><td style="padding:6px">홈페이지, SNS, 매장 밖 안내판</td></tr>
+<h3><span class="n">4-1</span>QR 만들기 도구 열기</h3>
+<p>내려받은 폴더의 <code>tools/qr-maker.html</code>을 더블클릭하세요. 브라우저에 아래 화면이 열립니다. 오른쪽 위에서 한국어 / English를 고를 수 있어요.</p>
+<img class="shot" src="images/qr-maker-empty.png" alt="QR 만들기 첫 화면">
+<div class="tip">💡 <code>qr-maker.html</code>과 <code>qrcode.js</code>는 같은 폴더에 있어야 해요. 압축을 푼 그대로 두고 여세요.</div>
+</div>
+<div class="step">
+<h3><span class="n">4-2</span>주소 붙여넣기 → QR 만들기</h3>
+<div class="flow"><span class="b"><b>웹 앱 주소</b> 칸에 3-4에서 복사한 주소 붙여넣기 (Ctrl+V)</span>→<span class="b"><b>카페 이름</b> 넣기 (선택)</span>→<span class="b"><b>QR 만들기</b> 클릭</span></div>
+<p>입장, 퇴장, 좌석 현황 카드 세 장이 바로 나옵니다. 휴대폰 카메라로 하나씩 찍어서 맞는 화면이 열리는지 확인하세요.</p>
+<img class="shot" src="images/qr-maker.png" alt="QR 세 장이 만들어진 화면">
+<div class="tip">⚠️ 빨간 글씨로 "주소가 … 모양인지 확인해 주세요"가 나오면 <code>/exec</code>로 끝나는 <b>웹 앱 URL</b>이 아닌 다른 주소(편집기 주소나 시트 주소)를 넣은 거예요. 3-4의 주소를 다시 복사하세요.</div>
+</div>
+<div class="step">
+<h3><span class="n">4-3</span>인쇄하거나 PDF로 저장하고 붙이기</h3>
+<p><b>인쇄하기</b>를 누르세요. 프린터를 고르면 바로 인쇄되고, 대상에서 <b>"PDF로 저장"</b>을 고르면 파일로 보관할 수 있어요. 인쇄할 때는 입력 칸은 빠지고 카드만 나옵니다.</p>
+<table class="t">
+<tr><th>QR</th><th>열리는 주소</th><th>붙일 곳</th></tr>
+<tr><td>입장</td><td><code>…/exec?p=in</code></td><td>테이블, 입구</td></tr>
+<tr><td>퇴장</td><td><code>…/exec?p=out</code></td><td>출구, 반납대</td></tr>
+<tr><td>좌석 현황</td><td><code>…/exec</code></td><td>홈페이지, SNS, 매장 밖 안내판</td></tr>
 </table>
+<div class="tip">💡 나중에 코드를 고쳐도 <b>배포 관리 → 새 버전</b>으로 올리면 주소가 그대로라 QR을 다시 뽑을 필요가 없어요.</div>
 </div>
 </section>
+
 <section class="part" id="p5">
 <h2><span class="badge" style="background:var(--hi)">5</span>휴대폰으로 확인하고 운영하기</h2>
 <div class="step">
 <h3><span class="n">5-1</span>손님이 보는 화면</h3>
 <p>입장 QR을 찍으면 왼쪽처럼 좌석 배치도가 나와요. 빈자리(흰색)를 누르고 <b>앉기</b>를 누르면 내 자리가 파란색이 됩니다. 나갈 때는 <b>퇴장하기</b>를 누르거나 퇴장 QR을 찍으면 돼요.</p>
-<div class="row" style="align-items:flex-start;gap:12px"><img src="images/checkin-pick.png" alt="자리 고르기" style="width:100%;max-width:220px;border:1px solid var(--line);border-radius:12px;display:block;margin-top:10px"><img src="images/checkin-done.png" alt="입장 완료" style="width:100%;max-width:220px;border:1px solid var(--line);border-radius:12px;display:block;margin-top:10px"><img src="images/checkout.png" alt="퇴장" style="width:100%;max-width:220px;border:1px solid var(--line);border-radius:12px;display:block;margin-top:10px"></div>
+<div class="row" style="align-items:flex-start;gap:12px"><img src="images/checkin-pick.png" alt="자리 고르기" class="shot" style="max-width:220px"><img src="images/checkin-done.png" alt="입장 완료" class="shot" style="max-width:220px"><img src="images/checkout.png" alt="퇴장" class="shot" style="max-width:220px"></div>
 </div>
 <div class="step">
 <h3><span class="n">5-2</span>운영 팁</h3>
 <ul>
 <li><b>기록 지우기</b>: Apps Script 편집기 위쪽 함수 목록에서 <code>clearLog</code>를 고르고 <b>▷ 실행</b>. 테스트 후나 영업 시작 전에 쓰세요.</li>
-<li><b>코드를 고친 뒤</b>: 저장만으로는 반영되지 않아요. <b>배포 → 배포 관리 → ✏️ → 버전: 새 버전 → 배포</b>. "새 배포"를 누르면 주소가 바뀌어 QR을 다시 만들어야 합니다.</li>
-<li><b>퇴장을 깜빡한 손님</b>: 90분(<code>STAY_MIN</code>)이 지나면 자동으로 빈자리가 돼요.</li>
+<li><b>코드를 고친 뒤</b> (좌석 배치를 바꾼 경우 포함): 저장만으로는 반영되지 않아요. <b>배포 → 배포 관리 → ✏️ → 버전: 새 버전 → 배포</b>. "새 배포"를 누르면 주소가 바뀌어 QR을 다시 만들어야 합니다.</li>
+<li><b>퇴장을 깜빡한 손님</b>: 자동 퇴장 시간(기본 90분)이 지나면 빈자리가 돼요. 좌석 배치 편집기에서 바꿀 수 있습니다.</li>
 </ul>
 </div>
 <div class="step">
@@ -452,6 +502,7 @@ setInterval(poll, 5000);
 <li><b>"Sorry, unable to open the file"</b>: 배포 관리 → ✏️ → 액세스 권한이 <b>"모든 사용자"</b>인지 확인하세요. "나만"이면 다른 사람은 열 수 없어요.</li>
 <li><b>본인 폰에서만 안 열림</b>: 구글 계정이 여러 개 로그인된 브라우저에서 생겨요. 시크릿 탭으로 열어 보세요.</li>
 <li><b>옛날 화면이 나옴</b>: 새 버전으로 배포하지 않은 경우예요. 5-2의 "코드를 고친 뒤"를 따라 하세요.</li>
+<li><b>저장할 때 오류가 남</b>: 2-3에서 설정 부분을 붙여넣을 때 <code>설정 시작</code>~<code>설정 끝</code> 바깥까지 지웠거나 두 번 붙여넣은 경우예요. 2-2부터 코드를 통째로 다시 붙여넣고 2-3을 다시 하세요.</li>
 </ul>
 </div>
 </section>
@@ -460,8 +511,8 @@ setInterval(poll, 5000);
 document.getElementById('cb').addEventListener('click',function(){
   var t=document.getElementById('code').textContent,b=this;
   function ok(){b.textContent='복사됨 ✓';setTimeout(function(){b.textContent='복사'},1800)}
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,fallback)}else fallback();
   function fallback(){var r=document.createRange();r.selectNodeContents(document.getElementById('code'));var s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy');ok()}catch(e){b.textContent='Ctrl+C 누르세요'}}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,fallback)}else fallback();
 });
 </script>
 </body>

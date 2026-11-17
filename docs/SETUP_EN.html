@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seat check-in setup</title>
+<style>
+:root{--bg:#F4F5F7;--card:#fff;--fg:#1F2328;--muted:#5F6670;--line:#DADCE0;--hi:#E8453C;--blue:#1A73E8;--purple:#673AB7;--green:#188038;--soft:#FFF4E5}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171A;--card:#1F2226;--fg:#E8EAED;--muted:#9AA0A6;--line:#3C4043;--soft:#3A2F1C}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.6;font-size:16px}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:26px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 20px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;color:var(--fg);text-decoration:none;font-size:14px}
+section.part{margin-bottom:40px}
+.part>h2{font-size:21px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.badge{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;color:#fff;font-size:15px;flex:none}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:14px}
+.step h3{margin:0 0 6px;font-size:17px}
+.step p{margin:6px 0;overflow-wrap:anywhere}
+.n{display:inline-block;min-width:24px;height:24px;border-radius:6px;background:var(--fg);color:var(--card);text-align:center;font-size:13px;line-height:24px;margin-right:6px;padding:0 4px}
+.tip{background:var(--soft);border-radius:10px;padding:10px 14px;font-size:14px;margin-top:10px}
+/* mock screen */
+.scr{margin-top:12px;border:1px solid #c8cbd0;border-radius:10px;overflow:hidden;background:#fff;color:#202124;font-size:13px;box-shadow:0 2px 8px rgb(0 0 0/.08)}
+.bar{background:#ECEEF1;padding:7px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #d5d8dc}
+.dot{width:10px;height:10px;border-radius:50%;background:#d0d3d8}
+.url{flex:1;background:#fff;border-radius:6px;padding:3px 10px;color:#5f6368;font-size:12px;margin-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.body{padding:14px;position:relative}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sp{flex:1}
+.btn{display:inline-block;border-radius:6px;padding:6px 14px;font-weight:600;font-size:13px;border:1px solid #dadce0;background:#fff;color:#202124}
+.btn.blue{background:#1A73E8;color:#fff;border-color:#1A73E8}
+.btn.purple{background:#673AB7;color:#fff;border-color:#673AB7}
+.hl{outline:3px solid var(--hi);outline-offset:3px;border-radius:6px;position:relative}
+.click{position:relative}
+.click::after{content:"Click here";position:absolute;top:-30px;left:50%;transform:translateX(-50%);background:var(--hi);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;white-space:nowrap;z-index:2}
+.formhead{border-top:8px solid #673AB7;border-radius:8px;background:#fff;border-left:1px solid #dadce0;border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;padding:12px 14px;margin-bottom:10px}
+.q{border:1px solid #dadce0;border-left:5px solid #4285F4;border-radius:8px;padding:12px 14px;background:#fff}
+.input{border-bottom:1px solid #9aa0a6;padding:4px 0;color:#5f6368;min-width:160px;flex:1}
+.sel{border:1px solid #dadce0;border-radius:6px;padding:5px 10px;background:#fff}
+.menu{position:relative;display:inline-block;background:#fff;border:1px solid #dadce0;border-radius:6px;box-shadow:0 4px 12px rgb(0 0 0/.15);padding:4px 0;min-width:170px}
+.menu div{padding:6px 14px}
+.menu div.on{background:#FDECEA;font-weight:700}
+.tabs{display:flex;justify-content:center;gap:24px;border-bottom:1px solid #dadce0;margin:-14px -14px 12px;padding:8px 0 0;background:#fff}
+.tabs span{padding:6px 4px 8px;color:#5f6368;font-weight:600}
+.tabs span.on{color:#673AB7;border-bottom:3px solid #673AB7}
+.gs{display:grid;grid-template-columns:30px repeat(4,1fr);font-size:12px;border-top:1px solid #e0e0e0;border-left:1px solid #e0e0e0}
+.gs div{border-right:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;padding:3px 6px;height:24px;overflow:hidden;white-space:nowrap}
+.gs .h{background:#F8F9FA;color:#5f6368;text-align:center}
+.menubar{display:flex;gap:14px;font-size:13px;padding:4px 0 10px;flex-wrap:wrap}
+.code{background:#fff;border:1px solid #e0e0e0;border-radius:6px;font-family:ui-monospace,Consolas,monospace;font-size:12px;padding:10px;line-height:1.5}
+.code .del{text-decoration:line-through;color:#c5221f}
+.side{display:flex;gap:0}
+.side .l{width:120px;background:#F8F9FA;border-right:1px solid #e0e0e0;padding:8px;font-size:12px;color:#5f6368}
+.dlg{border:1px solid #dadce0;border-radius:10px;box-shadow:0 6px 20px rgb(0 0 0/.18);padding:14px;max-width:440px;margin:0 auto;background:#fff}
+.dlg h4{margin:0 0 10px;font-size:15px}
+.field{border:1px solid #dadce0;border-radius:6px;padding:6px 10px;margin:4px 0 10px}
+.lbl{font-size:12px;color:#5f6368}
+.warn{text-align:center}
+.warn .ic{font-size:36px}
+a.lnk{color:#1A73E8;text-decoration:underline}
+.copybox{position:relative;margin-top:10px}
+.copybox pre{background:#0F1419;color:#E6E1CF;padding:14px;border-radius:10px;overflow:auto;max-height:260px;font-size:12px;margin:0}
+.copybtn{position:absolute;top:8px;right:8px;background:var(--blue);color:#fff;border:0;border-radius:6px;padding:6px 12px;font-weight:700;cursor:pointer;font-size:13px}
+.menu .click::after{top:50%;left:auto;right:-72px;transform:translateY(-50%)}
+.done{background:#E6F4EA;color:#137333;border-radius:12px;padding:16px;font-weight:600}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .done{background:#1E3A2A;color:#81C995}}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:14px}
+.tool{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.tool .ic{font-size:26px;line-height:1}
+.tool h3{margin:8px 0 4px;font-size:16px}
+.tool p{margin:0;font-size:14px;color:var(--muted)}
+.tool code{font-size:12px}
+.shot{width:100%;border:1px solid var(--line);border-radius:12px;display:block;margin-top:10px}
+.lang{float:right;font-size:14px}
+.lang a{color:var(--blue)}
+.code .set{background:#E8F0FE;outline:2px dashed #1A73E8;display:block;padding:4px 6px;margin:2px 0;border-radius:4px}
+.flow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;font-size:14px}
+.flow span.b{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+table.t{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+table.t th{text-align:left;padding:6px;border-bottom:1px solid var(--line)}
+table.t td{padding:6px;border-bottom:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="lang"><a href="설치가이드.html">한국어</a> | <b>English</b></p>
+<h1>Set up QR seat check-in</h1>
+<p class="sub">Click what the <b style="color:var(--hi)">red outline</b> marks. It takes one Google account and 20 to 30 minutes, and it is free. Google menu names are the English UI, with the Korean UI name in brackets.</p>
+<div class="toc"><a href="#p0">0 What you use</a><a href="#p1">1 Sheet</a><a href="#p2">2 Code and seat layout</a><a href="#p3">3 Deploy</a><a href="#p4">4 QR codes</a><a href="#p5">5 Test and run</a></div>
+
+<section class="part" id="p0">
+<h2><span class="badge" style="background:var(--muted)">0</span>Only three tools</h2>
+<p>There is nothing to install. Download the repository and unzip it: the <code>tools</code> folder holds two tools that open in your browser when you double-click them. Both work offline and send what you type nowhere.</p>
+<div class="tools">
+<div class="tool"><div class="ic">▦</div><h3>Google Sheets + Apps Script</h3><p>Stores the check-ins and serves the guest pages (check in, check out, live seats). Create it with the cafe owner's Google account. <b>Steps 1 to 3</b></p></div>
+<div class="tool"><div class="ic">🪑</div><h3>Seat layout editor</h3><p><code>tools/seat-editor.html</code><br>Build your zones and seat counts by clicking, and get a settings block to paste into the code. <b>Step 2-3</b></p></div>
+<div class="tool"><div class="ic">▣</div><h3>QR maker</h3><p><code>tools/qr-maker.html</code><br>Paste the web app URL and print three QR codes: check in, check out and live seats. <b>Step 4</b></p></div>
+</div>
+<div class="tip">💡 To download: on the GitHub repository page, click the green <b>Code</b> button → <b>Download ZIP</b> → unzip.</div>
+</section>
+
+<section class="part" id="p1">
+<h2><span class="badge" style="background:var(--green)">1</span>Create a Google Sheet</h2>
+<div class="step">
+<h3><span class="n">1-1</span>New spreadsheet</h3>
+<p>In Chrome, signed in to the cafe owner's Google account, open <a class="lnk" href="https://sheets.new" target="_blank">sheets.new</a>. A blank sheet opens right away. Rename it at the top left, for example <b>"Our cafe seats"</b>.</p>
+<div class="scr"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">docs.google.com/spreadsheets/d/…/edit</span></div>
+<div class="body"><div class="row" style="font-size:15px;margin-bottom:8px"><span style="color:#188038;font-size:18px">▦</span> <span class="hl" style="padding:0 6px">Our cafe seats</span></div>
+<div class="gs"><div class="h"></div><div class="h">A</div><div class="h">B</div><div class="h">C</div><div class="h">D</div>
+<div class="h">1</div><div></div><div></div><div></div><div></div><div class="h">2</div><div></div><div></div><div></div><div></div></div></div></div>
+<div class="tip">💡 You do not need a Google Form. The code creates a tab called <b>좌석기록</b> (seat log) inside this sheet and records check-ins there.</div>
+</div>
+</section>
+
+<section class="part" id="p2">
+<h2><span class="badge" style="background:#F9AB00">2</span>Paste the code and set your seats</h2>
+<div class="step">
+<h3><span class="n">2-1</span>Extensions → Apps Script</h3>
+<p>In the sheet from step 1, open <b>Extensions</b> (확장 프로그램) → <b>Apps Script</b> in the top menu.</p>
+<div class="scr"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">docs.google.com/spreadsheets/d/…</span></div>
+<div class="body">
+<div class="row" style="font-size:15px;margin-bottom:2px"><span style="color:#188038;font-size:18px">▦</span> Our cafe seats</div>
+<div class="menubar"><span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Data</span><span>Tools</span><span class="hl" style="padding:0 4px;font-weight:700">Extensions</span><span>Help</span></div>
+<div style="position:relative">
+<div class="gs"><div class="h"></div><div class="h">A</div><div class="h">B</div><div class="h">C</div><div class="h">D</div>
+<div class="h">1</div><div></div><div></div><div></div><div></div>
+<div class="h">2</div><div></div><div></div><div></div><div></div>
+<div class="h">3</div><div></div><div></div><div></div><div></div></div>
+<div class="menu" style="position:absolute;top:-6px;left:46%"><div>Add-ons ▸</div><div>Macros ▸</div><div class="on click">Apps Script</div><div>AppSheet ▸</div></div>
+</div></div></div>
+</div>
+
+<div class="step">
+<h3><span class="n">2-2</span>Replace the starter code and save</h3>
+<p>A code editor opens in a new tab with <code>function myFunction() { }</code>. Press <b>Ctrl+A</b> to select it all and delete it. Click <b>Copy</b> below, paste with <b>Ctrl+V</b>, then click the <b>💾 Save</b> icon (or Ctrl+S).</p>
+<div class="scr"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">script.google.com/…/edit</span></div>
+<div class="body">
+<div class="row" style="margin-bottom:10px"><b>Untitled project</b><span class="sp"></span><span class="btn blue">Deploy ▾</span></div>
+<div class="side"><div class="l">Files +<br><b style="color:#202124">Code.gs</b><br><br>Libraries +<br>Services +</div>
+<div style="flex:1;padding-left:10px"><div class="row" style="margin-bottom:6px;color:#5f6368"><span>↶ ↷</span><span class="click"><span class="hl" style="padding:0 6px">💾</span></span><span>▷ Run</span><span>Debug</span></div>
+<div class="code"><span class="del">function myFunction() {<br>&nbsp;&nbsp;<br>}</span><br><span style="color:#188038">→ delete it and paste the code below</span></div></div></div>
+</div></div>
+<div class="copybox"><button class="copybtn" id="cb">Copy</button><pre id="code">/**
+ * cafe-seat-qr · QR 좌석 체크인 (구글 Apps Script 웹 앱 하나로 동작)
+ * 설치 방법: README.md / docs/설치가이드.html
+ *
+ *   .../exec        → 좌석 현황 (발표 화면용, 5초마다 자동 갱신)
+ *   .../exec?p=in   → 입장: 빈자리를 눌러 앉기
+ *   .../exec?p=out  → 퇴장: 내 자리를 눌러 나가기
+ *
+ * 기록은 이 스프레드시트의 &#x27;좌석기록&#x27; 시트에 자동으로 쌓입니다 (없으면 자동 생성).
+ * 발표 직전 초기화: 위쪽 함수 목록에서 clearLog 를 고르고 ▷ 실행.
+ */
+// ===== 설정 시작 (SETTINGS START) =====
+// tools/seat-editor.html 에서 만든 설정을 이 줄과 &#x27;설정 끝&#x27; 줄 사이에 통째로 붙여넣으세요.
+const CAFE_NAME = &#x27;우리 카페&#x27;;   // 카페 이름
+const STAY_MIN = 90;            // 퇴장을 안 눌러도 이 시간(분)이 지나면 빈자리로
+const CALM = 0.4, BUSY = 0.75;  // 40% 미만 한산, 75% 이상 혼잡
+
+// 좌석 배치: from~to = 좌석 번호 범위, outlet = 콘센트가 있는 번호 범위 (없으면 [0, 0])
+const ZONES = [
+  { name: &#x27;창가 바&#x27;, note: &#x27;조용함&#x27;,    from: 1,  to: 10, outlet: [1, 10] },
+  { name: &#x27;2인석&#x27;,   note: &#x27;보통&#x27;,      from: 11, to: 26, outlet: [11, 18] },
+  { name: &#x27;4인석&#x27;,   note: &#x27;대화 많음&#x27;, from: 27, to: 38, outlet: [27, 30] },
+  { name: &#x27;소파&#x27;,    note: &#x27;대화 많음&#x27;, from: 39, to: 40, outlet: [0, 0] }
+];
+// ===== 설정 끝 (SETTINGS END) =====
+
+const LOG = &#x27;좌석기록&#x27;;
+const SEATS = ZONES.reduce(function (n, z) { return n + (z.to - z.from + 1); }, 0);
+
+function doGet(e) {
+  const p = (e &amp;&amp; e.parameter &amp;&amp; e.parameter.p) || &#x27;view&#x27;;
+  const mode = (p === &#x27;in&#x27; || p === &#x27;out&#x27;) ? p : &#x27;view&#x27;;
+  const boot = {
+    mode: mode, cafe: CAFE_NAME, zones: ZONES, seats: SEATS, stay: STAY_MIN,
+    url: ScriptApp.getService().getUrl(), state: getState()
+  };
+  const json = JSON.stringify(boot).replace(/&lt;/g, &#x27;\\u003c&#x27;);
+  const html = PAGE.replace(&#x27;__BOOT__&#x27;, function () { return json; });
+  const title = mode === &#x27;in&#x27; ? &#x27;입장&#x27; : mode === &#x27;out&#x27; ? &#x27;퇴장&#x27; : &#x27;좌석 현황&#x27;;
+  return HtmlService.createHtmlOutput(html)
+    .setTitle(CAFE_NAME + &#x27; &#x27; + title)
+    .addMetaTag(&#x27;viewport&#x27;, &#x27;width=device-width, initial-scale=1&#x27;);
+}
+
+function sheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(LOG);
+  if (!sh) { sh = ss.insertSheet(LOG); sh.appendRow([&#x27;시간&#x27;, &#x27;좌석&#x27;, &#x27;구분&#x27;]); }
+  return sh;
+}
+
+// 지금 앉아 있는 자리 = 마지막 기록이 &#x27;입장&#x27;이고 STAY_MIN 안에 들어온 자리
+function getState() {
+  const rows = sheet_().getDataRange().getValues().slice(1);
+  const now = new Date(), since = now.getTime() - STAY_MIN * 60000;
+  const last = {};
+  rows.forEach(function (r) {
+    if (r[0] instanceof Date) last[Number(r[1])] = { t: r[0].getTime(), a: r[2] };
+  });
+  const taken = [];
+  Object.keys(last).forEach(function (s) {
+    if (last[s].a === &#x27;입장&#x27; &amp;&amp; last[s].t &gt; since) taken.push(Number(s));
+  });
+  const ratio = taken.length / SEATS;
+  return {
+    taken: taken,
+    used: taken.length,
+    level: ratio &lt; CALM ? &#x27;calm&#x27; : ratio &lt; BUSY ? &#x27;mid&#x27; : &#x27;busy&#x27;,
+    time: Utilities.formatDate(now, &#x27;Asia/Seoul&#x27;, &#x27;HH:mm:ss&#x27;)
+  };
+}
+
+function record_(seat, action) {
+  seat = Number(seat);
+  if (!(seat &gt;= 1 &amp;&amp; seat &lt;= SEATS)) return { ok: false, msg: &#x27;없는 자리 번호예요.&#x27; };
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const st = getState();
+    const isTaken = st.taken.indexOf(seat) &gt;= 0;
+    if (action === &#x27;입장&#x27; &amp;&amp; isTaken) return { ok: false, msg: seat + &#x27;번은 방금 다른 분이 앉았어요. 다른 자리를 골라주세요.&#x27;, state: st };
+    if (action === &#x27;퇴장&#x27; &amp;&amp; !isTaken) return { ok: true, msg: seat + &#x27;번은 이미 빈자리예요.&#x27;, state: st };
+    sheet_().appendRow([new Date(), seat, action]);
+    SpreadsheetApp.flush();
+    return { ok: true, state: getState() };
+  } finally {
+    lock.releaseLock();
+  }
+}
+function checkIn(seat)  { return record_(seat, &#x27;입장&#x27;); }
+function checkOut(seat) { return record_(seat, &#x27;퇴장&#x27;); }
+
+// 발표 직전에 한 번 실행: 기록을 모두 지우고 제목 줄만 남김
+function clearLog() {
+  const sh = sheet_();
+  if (sh.getLastRow() &gt; 1) sh.deleteRows(2, sh.getLastRow() - 1);
+}
+
+const PAGE = `&lt;!doctype html&gt;
+&lt;html lang=&quot;ko&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;style&gt;
+:root{--bg:#F3F5F2;--card:#fff;--line:#D6DDD5;--fg:#1C2420;--muted:#5D6A63;--accent:#1F6B57;
+--calm:#2E8B57;--calm-bg:#E1F2E8;--mid:#B7791F;--mid-bg:#FBF0DC;--busy:#C0392B;--busy-bg:#F8E1DE;
+--free:#fff;--used:#9AA59F;--zone:#E8ECE7;--me:#2F6FE0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,&quot;Apple SD Gothic Neo&quot;,&quot;Malgun Gothic&quot;,sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 120px}
+h1{font-size:20px;margin:0}
+.sub{color:var(--muted);font-size:13px;margin:2px 0 14px}
+.banner{border-radius:14px;padding:14px 16px;margin-bottom:14px;font-weight:600}
+.banner.in{background:#E3EAFB;color:#1E3F8A}
+.banner.out{background:#FDEEE2;color:#8A3E12}
+.level{border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px}
+.level .big{font-size:48px;font-weight:800;line-height:1}
+.level .nums{display:flex;gap:22px;flex-wrap:wrap}
+.level .nums b{font-size:22px;display:block}
+.level .nums span{font-size:12px;color:var(--muted)}
+.calm{background:var(--calm-bg)}.calm .big{color:var(--calm)}
+.mid{background:var(--mid-bg)}.mid .big{color:var(--mid)}
+.busy{background:var(--busy-bg)}.busy .big{color:var(--busy)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px;border:1px solid var(--line)}
+.zone{margin-top:12px}
+.zone .zh{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.zone .zh b{font-size:14px}
+.seats{display:flex;flex-wrap:wrap;gap:6px;background:var(--zone);padding:8px;border-radius:12px}
+.seat{width:46px;height:46px;border-radius:9px;border:1px solid var(--line);background:var(--free);font-weight:700;font-size:14px;color:var(--fg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;cursor:default;font-family:inherit}
+.seat small{font-size:9px;line-height:1;color:#E07B00}
+.seat.taken{background:var(--used);border-color:var(--used);color:#fff}
+.seat.me{background:var(--me);border-color:var(--me);color:#fff}
+.seat.pick{outline:3px solid var(--fg);outline-offset:2px}
+.seat.can{cursor:pointer}
+.seat.can:hover{transform:translateY(-1px)}
+.seat:disabled{opacity:1}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgb(0 0 0/.08)}
+.bar .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bar .msg{flex:1;min-width:180px;font-weight:600}
+.btn{border:0;border-radius:10px;padding:12px 20px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;background:var(--accent);color:#fff}
+.btn.ghost{background:var(--zone);color:var(--fg)}
+.btn.warn{background:#C0392B}
+.btn:disabled{opacity:.5}
+.foot{color:var(--muted);font-size:12px;margin-top:10px}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--fg);color:#fff;padding:10px 16px;border-radius:10px;font-weight:600;z-index:9;max-width:92%;text-align:center}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+&lt;div class=&quot;wrap&quot;&gt;
+  &lt;h1 id=&quot;cafe&quot;&gt;&lt;/h1&gt;
+  &lt;div class=&quot;sub&quot; id=&quot;sub&quot;&gt;&lt;/div&gt;
+  &lt;div id=&quot;banner&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;level&quot; id=&quot;level&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;card&quot;&gt;
+    &lt;div class=&quot;legend&quot;&gt;&lt;span&gt;&lt;i&gt;&lt;/i&gt;빈자리&lt;/span&gt;&lt;span&gt;&lt;i style=&quot;background:var(--used);border-color:var(--used)&quot;&gt;&lt;/i&gt;사용 중&lt;/span&gt;&lt;span id=&quot;lgme&quot; hidden&gt;&lt;i style=&quot;background:var(--me);border-color:var(--me)&quot;&gt;&lt;/i&gt;내 자리&lt;/span&gt;&lt;span style=&quot;color:#E07B00&quot;&gt;⚡ 콘센트&lt;/span&gt;&lt;/div&gt;
+    &lt;div id=&quot;map&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;foot&quot; id=&quot;foot&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;bar&quot; id=&quot;bar&quot; hidden&gt;&lt;div class=&quot;in&quot;&gt;&lt;div class=&quot;msg&quot; id=&quot;barmsg&quot;&gt;&lt;/div&gt;&lt;span id=&quot;barbtns&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;script&gt;
+var B = __BOOT__;
+var S = B.state, pick = null, busy = false, mine = null;
+try { mine = Number(localStorage.getItem(&#x27;mySeat&#x27;)) || null; } catch (e) {}
+function saveMine(v){ mine = v; try { v ? localStorage.setItem(&#x27;mySeat&#x27;, v) : localStorage.removeItem(&#x27;mySeat&#x27;); } catch (e) {} }
+var LV = { calm: &#x27;한산&#x27;, mid: &#x27;보통&#x27;, busy: &#x27;혼잡&#x27; };
+function $(id){ return document.getElementById(id); }
+function isTaken(n){ return S.taken.indexOf(n) &gt;= 0; }
+function toast(t){ var d=document.createElement(&#x27;div&#x27;); d.className=&#x27;toast&#x27;; d.textContent=t; document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 2600); }
+
+function render(){
+  if (mine &amp;&amp; !isTaken(mine)) saveMine(null);   // 시간이 지나 자동 퇴장된 경우
+  if (pick &amp;&amp; B.mode === &#x27;in&#x27; &amp;&amp; isTaken(pick)) pick = null;
+  $(&#x27;cafe&#x27;).textContent = B.cafe;
+  $(&#x27;sub&#x27;).textContent = S.time + &#x27; 기준 · 좌석 &#x27; + B.seats + &#x27;석 · &#x27; + B.stay + &#x27;분 지나면 자동 퇴장&#x27;;
+  var bn = &#x27;&#x27;;
+  if (B.mode === &#x27;in&#x27;) bn = mine ? &#x27;&lt;div class=&quot;banner in&quot;&gt;&#x27; + mine + &#x27;번 자리에 앉아 계세요. 나갈 때 아래 [퇴장하기]를 눌러주세요.&lt;/div&gt;&#x27; : &#x27;&lt;div class=&quot;banner in&quot;&gt;빈자리(흰색)를 눌러 앉을 자리를 고르세요.&lt;/div&gt;&#x27;;
+  if (B.mode === &#x27;out&#x27;) bn = &#x27;&lt;div class=&quot;banner out&quot;&gt;&#x27; + (mine ? &#x27;아래 [퇴장하기]를 누르면 &#x27; + mine + &#x27;번 자리가 비워져요.&#x27; : &#x27;나가실 자리(회색)를 눌러주세요.&#x27;) + &#x27;&lt;/div&gt;&#x27;;
+  $(&#x27;banner&#x27;).innerHTML = bn;
+  var lv = $(&#x27;level&#x27;); lv.className = &#x27;level &#x27; + S.level;
+  lv.innerHTML = &#x27;&lt;div&gt;&lt;div style=&quot;font-size:12px;color:var(--muted)&quot;&gt;지금 매장 분위기&lt;/div&gt;&lt;div class=&quot;big&quot;&gt;&#x27; + LV[S.level] + &#x27;&lt;/div&gt;&lt;/div&gt;&#x27; +
+    &#x27;&lt;div class=&quot;nums&quot;&gt;&lt;div&gt;&lt;b&gt;&#x27; + S.used + &#x27;명&lt;/b&gt;&lt;span&gt;사용 중&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&#x27; + (B.seats - S.used) + &#x27;석&lt;/b&gt;&lt;span&gt;빈자리&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&#x27; + Math.round(S.used / B.seats * 100) + &#x27;%&lt;/b&gt;&lt;span&gt;좌석 사용률&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&#x27;;
+  $(&#x27;lgme&#x27;).hidden = !mine;
+  var h = &#x27;&#x27;;
+  B.zones.forEach(function (z) {
+    var free = 0, cells = &#x27;&#x27;;
+    for (var n = z.from; n &lt;= z.to; n++) {
+      var t = isTaken(n); if (!t) free++;
+      var cls = &#x27;seat&#x27; + (n === mine ? &#x27; me&#x27; : t ? &#x27; taken&#x27; : &#x27;&#x27;) + (n === pick ? &#x27; pick&#x27; : &#x27;&#x27;);
+      var can = (B.mode === &#x27;in&#x27; &amp;&amp; !t &amp;&amp; !mine) || (B.mode === &#x27;out&#x27; &amp;&amp; t &amp;&amp; !mine);
+      if (can) cls += &#x27; can&#x27;;
+      var out = (n &gt;= z.outlet[0] &amp;&amp; n &lt;= z.outlet[1]) ? &#x27;&lt;small&gt;⚡&lt;/small&gt;&#x27; : &#x27;&#x27;;
+      cells += &#x27;&lt;button class=&quot;&#x27; + cls + &#x27;&quot; data-n=&quot;&#x27; + n + &#x27;&quot;&#x27; + (can ? &#x27;&#x27; : &#x27; disabled&#x27;) + &#x27;&gt;&#x27; + n + out + &#x27;&lt;/button&gt;&#x27;;
+    }
+    h += &#x27;&lt;div class=&quot;zone&quot;&gt;&lt;div class=&quot;zh&quot;&gt;&lt;span&gt;&lt;b&gt;&#x27; + z.name + &#x27;&lt;/b&gt; · &#x27; + z.note + &#x27;&lt;/span&gt;&lt;span&gt;&#x27; + free + &#x27;/&#x27; + (z.to - z.from + 1) + &#x27; 빈자리&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;seats&quot;&gt;&#x27; + cells + &#x27;&lt;/div&gt;&lt;/div&gt;&#x27;;
+  });
+  $(&#x27;map&#x27;).innerHTML = h;
+  $(&#x27;foot&#x27;).textContent = B.mode === &#x27;view&#x27; ? &#x27;5초마다 자동으로 바뀝니다. 입장/퇴장은 QR을 찍어 주세요.&#x27; : &#x27;화면은 5초마다 자동으로 바뀝니다.&#x27;;
+  renderBar();
+}
+
+function renderBar(){
+  var bar = $(&#x27;bar&#x27;), msg = &#x27;&#x27;, btns = &#x27;&#x27;;
+  if (B.mode === &#x27;in&#x27;) {
+    if (mine) { msg = &#x27;내 자리: &#x27; + mine + &#x27;번&#x27;; btns = &#x27;&lt;button class=&quot;btn warn&quot; id=&quot;go-out&quot;&gt;퇴장하기&lt;/button&gt;&#x27;; }
+    else if (pick) { msg = pick + &#x27;번 자리에 앉을까요?&#x27;; btns = &#x27;&lt;button class=&quot;btn ghost&quot; id=&quot;cancel&quot;&gt;취소&lt;/button&gt; &lt;button class=&quot;btn&quot; id=&quot;go-in&quot;&gt;앉기&lt;/button&gt;&#x27;; }
+  } else if (B.mode === &#x27;out&#x27;) {
+    var s = mine || pick;
+    if (s) { msg = s + &#x27;번 자리에서 나갈까요?&#x27;; btns = (mine ? &#x27;&#x27; : &#x27;&lt;button class=&quot;btn ghost&quot; id=&quot;cancel&quot;&gt;취소&lt;/button&gt; &#x27;) + &#x27;&lt;button class=&quot;btn warn&quot; id=&quot;go-out&quot;&gt;퇴장하기&lt;/button&gt;&#x27;; }
+  }
+  bar.hidden = !msg;
+  $(&#x27;barmsg&#x27;).textContent = msg;
+  $(&#x27;barbtns&#x27;).innerHTML = btns;
+  if ($(&#x27;cancel&#x27;)) $(&#x27;cancel&#x27;).onclick = function(){ pick = null; render(); };
+  if ($(&#x27;go-in&#x27;)) $(&#x27;go-in&#x27;).onclick = function(){ send(&#x27;checkIn&#x27;, pick); };
+  if ($(&#x27;go-out&#x27;)) $(&#x27;go-out&#x27;).onclick = function(){ send(&#x27;checkOut&#x27;, mine || pick); };
+}
+
+function send(fn, seat){
+  if (busy || !seat) return; busy = true;
+  document.querySelectorAll(&#x27;.bar .btn&#x27;).forEach(function(b){ b.disabled = true; });
+  google.script.run.withSuccessHandler(function(r){
+    busy = false;
+    if (r.state) S = r.state;
+    if (fn === &#x27;checkIn&#x27; &amp;&amp; r.ok) { saveMine(seat); toast(seat + &#x27;번 입장 완료!&#x27;); }
+    if (fn === &#x27;checkOut&#x27; &amp;&amp; r.ok) { saveMine(null); toast(r.msg || (seat + &#x27;번 퇴장 완료. 감사합니다!&#x27;)); }
+    if (!r.ok) toast(r.msg);
+    pick = null; render();
+  }).withFailureHandler(function(e){
+    busy = false; toast(&#x27;연결이 잠깐 끊겼어요. 다시 눌러주세요.&#x27;); render();
+  })[fn](seat);
+}
+
+$(&#x27;map&#x27;).addEventListener(&#x27;click&#x27;, function(e){
+  var b = e.target.closest(&#x27;.seat.can&#x27;); if (!b) return;
+  pick = Number(b.getAttribute(&#x27;data-n&#x27;)); render();
+});
+
+function poll(){
+  if (busy) return;
+  google.script.run.withSuccessHandler(function(st){ if (!busy) { S = st; render(); } }).getState();
+}
+render();
+setInterval(poll, 5000);
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;`;
+</pre></div>
+<div class="tip">💡 The code comes with an example layout (40 seats). You make it match your cafe in the next step, 2-3. The guest pages are in Korean; to translate them, see <code>docs/CUSTOMIZE_EN.md</code>.</div>
+</div>
+
+<div class="step">
+<h3><span class="n">2-3</span>Build your seat layout in the seat editor</h3>
+<p><span class="n">①</span>Double-click <code>tools/seat-editor.html</code> and switch to <b>English</b> at the top right. Enter the cafe name and your zones (groups of similar seats, like a window bar or 2-seat tables) with their seat and outlet counts. The guest page preview on the right updates as you type. Seats are numbered from 1 automatically, top zone first.</p>
+<img class="shot" src="images/seat-editor-en.png" alt="Seat layout editor">
+<p style="margin-top:14px"><span class="n">②</span>When it looks right, click the blue <b>Copy</b> button in <b>4 Paste into the code</b>.</p>
+<p><span class="n">③</span>Back in the Apps Script editor, drag to select from the <code>// ===== 설정 시작 (SETTINGS START)</code> line down to the <code>// ===== 설정 끝 (SETTINGS END)</code> line, and press <b>Ctrl+V</b> to replace it. Then click <b>💾 Save</b>.</p>
+<div class="scr"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">script.google.com/…/edit · Code.gs</span></div>
+<div class="body"><div class="code"><span style="color:#5f6368">/** cafe-seat-qr … */</span><span class="set"><b>// ===== 설정 시작 (SETTINGS START) =====</b><br>const CAFE_NAME = '…';<br>const STAY_MIN = 90;<br>const ZONES = [ … ];<br><b>// ===== 설정 끝 (SETTINGS END) =====</b></span><span style="color:#1A73E8;font-weight:700">↑ Select only the dashed blue block and paste the editor output over it. Leave the code below as it is</span><br>const LOG = '좌석기록';<br>function doGet(e) { …</div></div></div>
+<div class="tip">💡 Not sure yet? Skip this and test with the example layout first. To change it later, paste and save the same way, then redeploy as a <b>new version</b> (see "After changing the code" in 5-2), and your QR codes keep working.<br>💡 To edit settings you already use, paste the settings block from your current code into <b>"Load existing settings"</b> at the bottom of the editor.</div>
+</div>
+</section>
+
+<section class="part" id="p3">
+<h2><span class="badge" style="background:var(--blue)">3</span>Deploy as a web app</h2>
+<div class="step">
+<h3><span class="n">3-1</span>Deploy → New deployment</h3>
+<p>Click the blue <b>Deploy</b> (배포) button at the top right of the code editor → <b>New deployment</b> (새 배포).</p>
+<div class="scr"><div class="body">
+<div class="row"><b>Untitled project</b><span class="sp"></span><span class="btn blue hl">Deploy ▾</span></div>
+<div class="row" style="justify-content:flex-end;margin-top:6px"><div class="menu"><div class="on">New deployment</div><div>Manage deployments</div><div>Test deployments</div></div></div>
+</div></div>
+</div>
+<div class="step">
+<h3><span class="n">3-2</span>Gear → Web app, then the settings</h3>
+<p>Click the <b>⚙ gear</b> next to <b>Select type</b> and choose <b>Web app</b> (웹 앱). Set the options as shown and click <b>Deploy</b>.</p>
+<div class="scr"><div class="body" style="background:rgb(0 0 0/.35)">
+<div class="dlg"><h4>New deployment</h4>
+<div class="row" style="margin-bottom:10px"><span class="lbl">Select type</span><span class="hl" style="padding:0 6px">⚙</span><div class="menu" style="min-width:120px;margin-left:6px"><div class="on">Web app</div><div>API Executable</div><div>Add-on</div></div></div>
+<div class="lbl">Description</div><div class="field" style="color:#9aa0a6">seats v1 (anything)</div>
+<div class="lbl">Execute as</div><div class="field hl">Me (your email) ▾</div>
+<div class="lbl">Who has access</div><div class="field hl"><b>Anyone</b> ▾</div>
+<div class="row" style="justify-content:flex-end"><span class="btn">Cancel</span><span class="click"><span class="btn blue hl">Deploy</span></span></div></div>
+</div></div>
+<div class="tip">⚠️ <b>Who has access</b> must be <b>"Anyone"</b> (모든 사용자). With "Anyone with Google account" or "Only myself", guests' phones cannot open it.</div>
+</div>
+<div class="step">
+<h3><span class="n">3-3</span>Authorize (first time only)</h3>
+<p>Click <b>Authorize access</b> and choose your Google account. You will see <b>"Google hasn't verified this app"</b>. That is normal for a script you made yourself.</p>
+<div class="scr"><div class="body">
+<div class="dlg warn"><div class="ic">⚠️</div><h4>Google hasn't verified this app</h4>
+<p style="color:#5f6368;font-size:12px;margin:4px 0 10px">The app is requesting access to sensitive info in your Google Account.</p>
+<div class="row" style="justify-content:space-between"><span class="click"><span class="hl" style="color:#5f6368;font-size:12px;padding:2px 6px">① Advanced</span></span><span class="btn blue">Back to safety</span></div>
+<p style="text-align:left;font-size:12px;margin-top:14px"><span class="hl" style="color:#1A73E8;text-decoration:underline;padding:2px 4px">② Go to Untitled project (unsafe)</span></p>
+</div>
+<div style="text-align:center;margin:10px 0;color:#5f6368">↓ next screen</div>
+<div class="dlg"><h4>Untitled project wants to access your Google Account</h4><p style="font-size:12px;color:#5f6368">• See, edit, create and delete your Google Sheets spreadsheets</p>
+<div class="row" style="justify-content:flex-end"><span class="btn">Cancel</span><span class="btn blue hl">③ Allow</span></div></div>
+</div></div>
+<div class="tip">💡 The code only reads and writes the <b>좌석기록</b> tab of this sheet. It does not touch other files or email.</div>
+</div>
+<div class="step">
+<h3><span class="n">3-4</span>Copy the web app URL</h3>
+<p style="overflow-wrap:anywhere">When the deployment finishes, click <b>Copy</b> next to the URL under <b>Web app</b>. It looks like <code>https://script.google.com/macros/s/…/exec</code>. You need it in step 4.</p>
+<div class="scr"><div class="body" style="background:rgb(0 0 0/.35)">
+<div class="dlg"><h4>New deployment ✓</h4>
+<div class="lbl">Deployment ID</div><div class="field" style="color:#9aa0a6">AKfycb…</div>
+<div class="lbl">Web app</div><div class="row"><div class="field" style="flex:1;margin:0;overflow:hidden;white-space:nowrap">https://script.google.com/macros/s/AKfy…/exec</div><span class="click"><span class="btn hl">Copy</span></span></div>
+<div class="row" style="justify-content:flex-end;margin-top:10px"><span class="btn blue">Done</span></div></div>
+</div></div>
+<p style="overflow-wrap:anywhere">Paste the URL into a new tab. If you see the seat map with <b>"한산"</b> (calm), the deployment works, and a <b>좌석기록</b> tab appears at the bottom of the sheet.</p>
+</div>
+</section>
+
+<section class="part" id="p4">
+<h2><span class="badge" style="background:var(--purple)">4</span>Make the three QR codes</h2>
+<div class="step">
+<h3><span class="n">4-1</span>Open the QR maker</h3>
+<p>Double-click <code>tools/qr-maker.html</code> in the downloaded folder. This page opens in your browser. Choose 한국어 / <b>English</b> at the top.</p>
+<img class="shot" src="images/qr-maker-empty-en.png" alt="QR maker, empty">
+<div class="tip">💡 <code>qr-maker.html</code> needs <code>qrcode.js</code> in the same folder. Open it from the unzipped folder as it is.</div>
+</div>
+<div class="step">
+<h3><span class="n">4-2</span>Paste the URL → Make QR codes</h3>
+<div class="flow"><span class="b">Paste the URL from 3-4 into <b>Web app URL</b> (Ctrl+V)</span>→<span class="b">Add the <b>cafe name</b> (optional)</span>→<span class="b">Click <b>Make QR codes</b></span></div>
+<p>Three cards appear: check in, check out and live seats. Scan each one with a phone camera to check it opens the right page.</p>
+<img class="shot" src="images/qr-maker-en.png" alt="Three QR codes made">
+<div class="tip">⚠️ If red text says "Check that the URL looks like …", you pasted another address (the editor or the sheet). Copy the <b>web app URL</b> ending in <code>/exec</code> from 3-4 again.</div>
+</div>
+<div class="step">
+<h3><span class="n">4-3</span>Print or save as PDF, then put them up</h3>
+<p>Click <b>Print</b>. Pick a printer, or choose <b>"Save as PDF"</b> to keep a file. Only the cards are printed, not the input form.</p>
+<table class="t">
+<tr><th>QR</th><th>Opens</th><th>Where to put it</th></tr>
+<tr><td>Check in · 입장</td><td><code>…/exec?p=in</code></td><td>Tables, entrance</td></tr>
+<tr><td>Check out · 퇴장</td><td><code>…/exec?p=out</code></td><td>Exit, tray return</td></tr>
+<tr><td>Live seats · 좌석 현황</td><td><code>…/exec</code></td><td>Website, social media, a sign outside</td></tr>
+</table>
+<div class="tip">💡 If you change the code later and publish it with <b>Manage deployments → New version</b>, the URL stays the same and you never need to reprint.</div>
+</div>
+</section>
+
+<section class="part" id="p5">
+<h2><span class="badge" style="background:var(--hi)">5</span>Test on a phone and run it</h2>
+<div class="step">
+<h3><span class="n">5-1</span>What guests see</h3>
+<p>Scanning the check-in QR shows the seat map (left). Tap a white seat, then <b>앉기</b> (Sit), and the seat turns blue. To leave, tap <b>퇴장하기</b> (Leave) or scan the check-out QR.</p>
+<div class="row" style="align-items:flex-start;gap:12px"><img src="images/checkin-pick.png" alt="Pick a seat" class="shot" style="max-width:220px"><img src="images/checkin-done.png" alt="Checked in" class="shot" style="max-width:220px"><img src="images/checkout.png" alt="Check out" class="shot" style="max-width:220px"></div>
+</div>
+<div class="step">
+<h3><span class="n">5-2</span>Running it</h3>
+<ul>
+<li><b>Erase check-ins</b>: in the Apps Script editor, choose <code>clearLog</code> in the function list and click <b>▷ Run</b>. Use it after testing or before opening.</li>
+<li><b>After changing the code</b> (including a new seat layout): saving is not enough. Use <b>Deploy → Manage deployments → ✏️ → Version: New version → Deploy</b>. <i>New deployment</i> would create a new URL, and you would need new QR codes.</li>
+<li><b>Guests who forget to check out</b>: the seat frees itself after the auto check-out time (90 minutes by default). Change it in the seat editor.</li>
+</ul>
+</div>
+<div class="step">
+<h3><span class="n">5-3</span>Troubleshooting</h3>
+<ul>
+<li><b>"Sorry, unable to open the file"</b>: Manage deployments → ✏️ → check that access is <b>"Anyone"</b>. With "Only myself", nobody else can open it.</li>
+<li><b>Fails only on your own phone</b>: the browser is signed in to several Google accounts. Open the link in a private / incognito tab.</li>
+<li><b>You see the old page</b>: you did not deploy a new version. Follow "After changing the code" in 5-2.</li>
+<li><b>Error when saving</b>: in 2-3 you deleted lines outside <code>SETTINGS START</code>…<code>SETTINGS END</code>, or pasted twice. Paste the whole code again from 2-2, then redo 2-3.</li>
+</ul>
+</div>
+</section>
+</div>
+<script>
+document.getElementById('cb').addEventListener('click',function(){
+  var t=document.getElementById('code').textContent,b=this;
+  function ok(){b.textContent='Copied ✓';setTimeout(function(){b.textContent='Copy'},1800)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(document.getElementById('code'));var s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy');ok()}catch(e){b.textContent='Press Ctrl+C'}}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,fallback)}else fallback();
+});
+</script>
+</body>
+</html>

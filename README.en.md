@@ -26,12 +26,23 @@ It runs entirely on Google Sheets + Apps Script: **no server, no cost**, and a c
 
 The guest-facing text is in Korean. To translate it, edit the strings in `apps-script/Code.gs` (see [docs/CUSTOMIZE_EN.md](docs/CUSTOMIZE_EN.md)).
 
-## Setup (about 20 minutes)
+## Only three tools
 
-Full step-by-step instructions: **[docs/SETUP_EN.md](docs/SETUP_EN.md)**. An illustrated Korean guide is in [docs/설치가이드.html](docs/설치가이드.html).
+| Tool | What it does |
+| --- | --- |
+| **Google Sheets + Apps Script** | Stores check-ins and serves the check-in, check-out and live seat pages (cafe owner's Google account) |
+| [`tools/seat-editor.html`](tools/seat-editor.html) | Seat layout editor: build your zones and seat counts by clicking, and get a settings block for the code |
+| [`tools/qr-maker.html`](tools/qr-maker.html) | Turns the web app URL into three printable QR codes: check in, check out, live seats |
+
+Both tools open in your browser when you double-click them in the downloaded folder, work offline, and switch between English and Korean.
+
+## Setup (20 to 30 minutes)
+
+Illustrated step-by-step guide: download the repository and open **[docs/SETUP_EN.html](docs/SETUP_EN.html)** in your browser (it has a copy button for the code). Text version: [docs/SETUP_EN.md](docs/SETUP_EN.md). Korean: [docs/설치가이드.html](docs/설치가이드.html).
 
 1. **Create a Google Sheet** with the cafe owner's account: [sheets.new](https://sheets.new)
 2. **Paste the code**: in the sheet, *Extensions → Apps Script*, replace everything with [`apps-script/Code.gs`](apps-script/Code.gs), save
+   - **Seat layout**: build your seats in [`tools/seat-editor.html`](tools/seat-editor.html), click **Copy**, paste over the `SETTINGS START` … `SETTINGS END` block, save
 3. **Deploy as a web app**: *Deploy → New deployment → Web app*, execute as **Me**, access **Anyone**, authorize, copy the `/exec` URL
 4. **Make the QR codes**: open [`tools/qr-maker.html`](tools/qr-maker.html), paste the URL, and print the check-in, check-out and live-map QR codes (works offline)
 5. **Test**: scan the check-in QR with a phone, take a seat, and watch it change on the live map
@@ -47,7 +58,7 @@ Every cafe has a different floor plan. Open **[`tools/seat-editor.html`](tools/s
 - Cafe name, auto check-out time, calm / busy thresholds
 - A live preview of the guest page; when done, click **Copy** and paste over the `SETTINGS START` … `SETTINGS END` block in `Code.gs`
 
-<img src="docs/images/seat-editor.png" width="720" alt="Seat layout editor">
+<img src="docs/images/seat-editor-en.png" width="720" alt="Seat layout editor">
 
 To edit the code by hand instead, see **[docs/CUSTOMIZE_EN.md](docs/CUSTOMIZE_EN.md)**.
 
@@ -72,13 +83,14 @@ After editing the code, publish it with **Deploy → Manage deployments → ✏�
 
 ```
 apps-script/Code.gs       Google Apps Script code (the only file to paste)
-docs/SETUP_EN.md          English setup guide
+docs/SETUP_EN.html        Illustrated setup guide (English)
+docs/SETUP_EN.md          English setup guide (text)
 docs/CUSTOMIZE_EN.md      English customization guide
 docs/설치가이드.html        Illustrated setup guide (Korean)
 docs/커스터마이즈.md        Customization guide (Korean)
 docs/images/              Screenshots
-tools/seat-editor.html    Seat layout editor (offline)
-tools/qr-maker.html       Make the three QR codes (offline)
+tools/seat-editor.html    Seat layout editor (offline, EN/KO)
+tools/qr-maker.html       Make the three QR codes (offline, EN/KO)
 tools/qrcode.js           QR library (Kazuhiko Arase, MIT)
 ```
 
