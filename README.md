@@ -40,8 +40,16 @@
 
 ## 우리 카페에 맞게 바꾸기
 
-카페 이름, 좌석 배치, 자동 퇴장 시간, 한산/혼잡 기준은 `Code.gs` 맨 위 몇 줄만 고치면 됩니다.
-자세한 방법은 **[docs/커스터마이즈.md](docs/커스터마이즈.md)** 를 보세요.
+카페마다 좌석 구조가 다르죠. **[`tools/seat-editor.html`](tools/seat-editor.html)** (좌석 배치 편집기)을 열면 코드를 몰라도 클릭과 숫자 입력만으로 바꿀 수 있어요.
+
+- 구역(창가 바, 2인석, 루프탑 등)을 추가 · 삭제 · 순서 변경
+- 구역마다 좌석 수와 콘센트 자리 수 입력 → 좌석 번호는 자동으로 매겨짐
+- 카페 이름, 자동 퇴장 시간, 한산/혼잡 기준
+- 손님 화면 미리보기가 바로 바뀌고, 완성되면 **[복사]** → `Code.gs`의 `설정 시작` ~ `설정 끝` 사이에 붙여넣기
+
+<img src="docs/images/seat-editor.png" width="720" alt="좌석 배치 편집기">
+
+직접 코드를 고치고 싶다면 **[docs/커스터마이즈.md](docs/커스터마이즈.md)** 를 보세요.
 
 코드를 고친 뒤에는 **배포 → 배포 관리 → ✏️ → 버전: 새 버전 → 배포** 로 반영하세요. "새 배포"를 누르면 주소가 바뀌어 QR을 다시 만들어야 합니다.
 
@@ -69,6 +77,7 @@ docs/커스터마이즈.md        이름 · 좌석 배치 · 기준 바꾸기
 docs/SETUP_EN.md          English setup guide
 docs/CUSTOMIZE_EN.md      English customization guide
 docs/images/              화면 예시
+tools/seat-editor.html    좌석 배치 편집기 (오프라인, 한/영)
 tools/qr-maker.html       QR 세 장 만들기 (오프라인)
 tools/qrcode.js           QR 생성 라이브러리 (Kazuhiko Arase, MIT)
 ```

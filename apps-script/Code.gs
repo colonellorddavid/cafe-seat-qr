@@ -9,19 +9,22 @@
  * 기록은 이 스프레드시트의 '좌석기록' 시트에 자동으로 쌓입니다 (없으면 자동 생성).
  * 발표 직전 초기화: 위쪽 함수 목록에서 clearLog 를 고르고 ▷ 실행.
  */
-const CAFE_NAME = '우리 카페';   // ← 카페 이름으로 바꾸세요
+// ===== 설정 시작 (SETTINGS START) =====
+// tools/seat-editor.html 에서 만든 설정을 이 줄과 '설정 끝' 줄 사이에 통째로 붙여넣으세요.
+const CAFE_NAME = '우리 카페';   // 카페 이름
 const STAY_MIN = 90;            // 퇴장을 안 눌러도 이 시간(분)이 지나면 빈자리로
 const CALM = 0.4, BUSY = 0.75;  // 40% 미만 한산, 75% 이상 혼잡
-const LOG = '좌석기록';
 
-// 좌석 배치 ← 매장에 맞게 바꾸세요 (docs/커스터마이즈.md)
-// from~to: 좌석 번호 범위, outlet: 콘센트가 있는 번호 범위 (없으면 [0, 0])
+// 좌석 배치: from~to = 좌석 번호 범위, outlet = 콘센트가 있는 번호 범위 (없으면 [0, 0])
 const ZONES = [
   { name: '창가 바', note: '조용함',    from: 1,  to: 10, outlet: [1, 10] },
   { name: '2인석',   note: '보통',      from: 11, to: 26, outlet: [11, 18] },
   { name: '4인석',   note: '대화 많음', from: 27, to: 38, outlet: [27, 30] },
   { name: '소파',    note: '대화 많음', from: 39, to: 40, outlet: [0, 0] }
 ];
+// ===== 설정 끝 (SETTINGS END) =====
+
+const LOG = '좌석기록';
 const SEATS = ZONES.reduce(function (n, z) { return n + (z.to - z.from + 1); }, 0);
 
 function doGet(e) {

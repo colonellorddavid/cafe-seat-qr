@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>좌석 배치 편집기</title>
+<style>
+:root{--bg:#F3F5F2;--card:#fff;--fg:#1C2420;--muted:#5D6A63;--line:#D6DDD5;--accent:#1F6B57;--zone:#E8ECE7;--soft:#EEF3EF;--warn:#C0392B}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141A17;--card:#1C2420;--fg:#E7ECE9;--muted:#9BA8A1;--line:#33403A;--accent:#5CC0A0;--zone:#242D29;--soft:#1E2A25;--warn:#F07A6B}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.5;font-size:15px}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+header h1{font-size:23px;margin:0}
+header p{margin:2px 0 0;color:var(--muted)}
+.lang{margin-left:auto;display:flex;gap:4px;background:var(--zone);padding:3px;border-radius:9px}
+.lang button{border:0;background:transparent;color:var(--muted);padding:5px 12px;border-radius:7px;font-weight:600;cursor:pointer;font-size:13px}
+.lang button.on{background:var(--card);color:var(--fg)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+.card h2{font-size:16px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.num{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--card);font-size:12px}
+label{display:block;font-size:13px;font-weight:600;margin:8px 0 4px}
+input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:var(--card);color:var(--fg);font-family:inherit}
+input[type=number]{width:90px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.row > div{flex:1;min-width:120px}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.zone{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--soft)}
+.zone .top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.zone .top b{font-size:13px;color:var(--muted)}
+.zone .top .sp{flex:1}
+.ib{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:7px;width:30px;height:30px;cursor:pointer;font-size:14px}
+.ib.del{color:var(--warn)}
+.ib:disabled{opacity:.35;cursor:default}
+.zrow{display:grid;grid-template-columns:1.3fr 1.3fr .8fr .8fr;gap:8px}
+@media (max-width:520px){.zrow{grid-template-columns:1fr 1fr}}
+.zrow input[type=number]{width:100%}
+.btn{border:0;border-radius:10px;padding:10px 16px;font-size:15px;font-weight:700;cursor:pointer;background:var(--accent);color:var(--card);font-family:inherit}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.summary{display:flex;gap:18px;flex-wrap:wrap;margin:4px 0 12px}
+.summary b{font-size:22px;display:block}
+.summary span{font-size:12px;color:var(--muted)}
+/* preview (same look as the guest page) */
+.pv{background:#F3F5F2;border-radius:12px;padding:14px;color:#1C2420}
+.pv h3{margin:0;font-size:18px}
+.pv .sub{font-size:12px;color:#5D6A63;margin:2px 0 10px}
+.pv .lv{border-radius:12px;padding:10px 14px;background:#E1F2E8;margin-bottom:10px;font-size:13px}
+.pv .lv b{font-size:30px;color:#2E8B57;display:block;line-height:1.1}
+.pv .box{background:#fff;border:1px solid #D6DDD5;border-radius:12px;padding:12px}
+.pv .zh{display:flex;justify-content:space-between;font-size:12px;margin:10px 0 5px}
+.pv .zh:first-child{margin-top:0}
+.pv .seats{display:flex;flex-wrap:wrap;gap:5px;background:#E8ECE7;padding:6px;border-radius:10px}
+.pv .s{width:38px;height:38px;border-radius:8px;border:1px solid #D6DDD5;background:#fff;font-weight:700;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pv .s small{font-size:8px;line-height:1;color:#E07B00}
+.code{position:relative}
+.code pre{background:#0F1419;color:#E6E1CF;padding:14px;border-radius:10px;overflow:auto;font-size:12.5px;margin:0;max-height:380px;white-space:pre}
+.code .btn{position:absolute;top:8px;right:8px;padding:6px 12px;font-size:13px;background:#2F6FE0;color:#fff}
+ol.steps{margin:8px 0 0;padding-left:20px}
+ol.steps li{margin:4px 0}
+.err{color:var(--warn);font-weight:600;font-size:13px;min-height:1em}
+textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;padding:8px;font-family:ui-monospace,Consolas,monospace;font-size:12px;background:var(--card);color:var(--fg)}
+details summary{cursor:pointer;font-weight:600;font-size:14px}
+code{background:var(--zone);padding:1px 5px;border-radius:5px;font-size:90%}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1 data-t="title"></h1><p data-t="lead"></p></div>
+  <div class="lang"><button id="lk" class="on">한국어</button><button id="le">English</button></div>
+</header>
+
+<div class="grid">
+<div>
+  <div class="card">
+    <h2><span class="num">1</span><span data-t="basic"></span></h2>
+    <label for="cafe" data-t="cafeName"></label>
+    <input id="cafe">
+    <div class="row">
+      <div><label for="stay" data-t="stay"></label><input id="stay" type="number" min="10" max="720" step="10"><div class="hint" data-t="stayHint"></div></div>
+      <div><label for="calm" data-t="calm"></label><input id="calm" type="number" min="1" max="99"><div class="hint" data-t="calmHint"></div></div>
+      <div><label for="busy" data-t="busy"></label><input id="busy" type="number" min="2" max="100"><div class="hint" data-t="busyHint"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">2</span><span data-t="zones"></span></h2>
+    <div class="hint" data-t="zonesHint" style="margin:-4px 0 10px"></div>
+    <div id="zones"></div>
+    <button class="btn ghost" id="add" data-t="addZone"></button>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary data-t="importTitle"></summary>
+      <div class="hint" data-t="importHint" style="margin:8px 0"></div>
+      <textarea id="imp"></textarea>
+      <div class="err" id="imperr"></div>
+      <button class="btn ghost" id="impgo" data-t="importBtn"></button>
+    </details>
+  </div>
+</div>
+
+<div>
+  <div class="card">
+    <h2><span class="num">3</span><span data-t="preview"></span></h2>
+    <div class="summary" id="sum"></div>
+    <div class="pv" id="pv"></div>
+  </div>
+  <div class="card">
+    <h2><span class="num">4</span><span data-t="paste"></span></h2>
+    <div class="code"><button class="btn" id="copy" data-t="copy"></button><pre id="out"></pre></div>
+    <ol class="steps" id="steps"></ol>
+  </div>
+</div>
+</div>
+</div>
+
+<script>
+var T = {
+  ko: {
+    title: '좌석 배치 편집기', lead: '클릭과 숫자 입력만으로 우리 카페 좌석 배치를 만들고, 완성된 설정을 코드에 붙여넣으세요. 인터넷 없이 동작합니다.',
+    basic: '기본 정보', cafeName: '카페 이름', stay: '자동 퇴장 (분)', stayHint: '퇴장을 깜빡하면 이 시간 뒤 빈자리로',
+    calm: '한산 기준 (%)', calmHint: '이 비율 미만이면 한산', busy: '혼잡 기준 (%)', busyHint: '이 비율 이상이면 혼잡',
+    zones: '구역과 좌석', zonesHint: '구역은 창가 바, 2인석처럼 비슷한 자리를 묶은 단위예요. 좌석 번호는 위 구역부터 1번으로 자동으로 매겨집니다. 콘센트 자리는 각 구역의 앞 번호부터 채워져요.',
+    zone: '구역', zName: '구역 이름', zNote: '한마디 설명', zSeats: '좌석 수', zOutlet: '콘센트 자리 수',
+    addZone: '+ 구역 추가', up: '위로', down: '아래로', del: '삭제',
+    importTitle: '이미 쓰던 설정 불러오기 (선택)', importHint: 'Code.gs의 "설정 시작" ~ "설정 끝" 사이를 통째로 붙여넣고 [불러오기]를 누르면 편집기에 채워집니다.', importBtn: '불러오기',
+    importErr: '설정을 찾지 못했어요. const ZONES = [ ... ]; 부분이 들어 있는지 확인해 주세요.',
+    preview: '손님 화면 미리보기', total: '전체 좌석', outlets: '콘센트 자리', zcount: '구역 수',
+    paste: '코드에 붙여넣기', copy: '복사', copied: '복사됨 ✓',
+    steps: ['위 [복사] 버튼을 누르세요.', 'Apps Script 편집기에서 <code>// ===== 설정 시작</code> 줄부터 <code>// ===== 설정 끝</code> 줄까지 선택하고, 붙여넣기(Ctrl+V)로 바꾸세요.', '💾 저장 → 배포 → <b>배포 관리</b> → ✏️ → 버전: <b>새 버전</b> → 배포. 주소가 그대로라 QR은 다시 만들 필요가 없어요.'],
+    free: '빈자리', seatsUnit: '석', calmWord: '한산', now: '지금 매장 분위기', sub: '좌석 {n}석 · {m}분 지나면 자동 퇴장',
+    errBusy: '혼잡 기준은 한산 기준보다 커야 해요.', errZone: '좌석이 1개 이상인 구역이 하나는 있어야 해요.'
+  },
+  en: {
+    title: 'Seat layout editor', lead: 'Build your cafe\'s seat layout by clicking and typing numbers, then paste the finished settings into the code. Works offline.',
+    basic: 'Basics', cafeName: 'Cafe name', stay: 'Auto check-out (min)', stayHint: 'Seat frees itself after this if a guest forgets',
+    calm: 'Calm below (%)', calmHint: 'Under this share of seats taken = calm', busy: 'Busy from (%)', busyHint: 'At or above this share = busy',
+    zones: 'Zones and seats', zonesHint: 'A zone is a group of similar seats, like a window bar or 2-seat tables. Seats are numbered from 1 automatically, top zone first. Outlet seats are the first numbers in each zone.',
+    zone: 'Zone', zName: 'Zone name', zNote: 'Short note', zSeats: 'Seats', zOutlet: 'Outlet seats',
+    addZone: '+ Add zone', up: 'Up', down: 'Down', del: 'Delete',
+    importTitle: 'Load existing settings (optional)', importHint: 'Paste everything between "SETTINGS START" and "SETTINGS END" from Code.gs and click Load.', importBtn: 'Load',
+    importErr: 'Could not find the settings. Make sure the text includes const ZONES = [ ... ];',
+    preview: 'Guest page preview', total: 'Total seats', outlets: 'Outlet seats', zcount: 'Zones',
+    paste: 'Paste into the code', copy: 'Copy', copied: 'Copied ✓',
+    steps: ['Click Copy above.', 'In the Apps Script editor, select from the <code>// ===== 설정 시작 (SETTINGS START)</code> line to the <code>// ===== 설정 끝 (SETTINGS END)</code> line and paste (Ctrl+V) over it.', '💾 Save → Deploy → <b>Manage deployments</b> → ✏️ → Version: <b>New version</b> → Deploy. The URL stays the same, so your QR codes keep working.'],
+    free: 'free', seatsUnit: '', calmWord: '한산', now: '지금 매장 분위기', sub: '좌석 {n}석 · {m}분 지나면 자동 퇴장',
+    errBusy: 'Busy must be higher than calm.', errZone: 'At least one zone needs one or more seats.'
+  }
+};
+var lang = 'ko';
+var S = { cafe: '우리 카페', stay: 90, calm: 40, busy: 75, zones: [
+  { name: '창가 바', note: '조용함', seats: 10, outlet: 10 },
+  { name: '2인석', note: '보통', seats: 16, outlet: 8 },
+  { name: '4인석', note: '대화 많음', seats: 12, outlet: 4 },
+  { name: '소파', note: '대화 많음', seats: 2, outlet: 0 }
+]};
+try { var saved = JSON.parse(localStorage.getItem('seatEditor') || 'null'); if (saved && saved.zones) S = saved; lang = localStorage.getItem('seatEditorLang') || 'ko'; } catch (e) {}
+function save(){ try { localStorage.setItem('seatEditor', JSON.stringify(S)); localStorage.setItem('seatEditorLang', lang); } catch (e) {} }
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+function jsq(s){ return "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' ') + "'"; }
+function clampInt(v, lo, hi, d){ v = parseInt(v, 10); if (isNaN(v)) return d; return Math.max(lo, Math.min(hi, v)); }
+
+function applyLang(){
+  var L = T[lang];
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-t]').forEach(function(el){ el.textContent = L[el.getAttribute('data-t')]; });
+  $('lk').className = lang === 'ko' ? 'on' : ''; $('le').className = lang === 'en' ? 'on' : '';
+  $('steps').innerHTML = L.steps.map(function(s){ return '<li>' + s + '</li>'; }).join('');
+  document.title = L.title;
+}
+
+function renderZones(){
+  var L = T[lang];
+  $('zones').innerHTML = S.zones.map(function(z, i){
+    return '<div class="zone"><div class="top"><b>' + L.zone + ' ' + (i + 1) + '</b><span class="sp"></span>' +
+      '<button class="ib" data-act="up" data-i="' + i + '" title="' + L.up + '" aria-label="' + L.up + '"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+      '<button class="ib" data-act="down" data-i="' + i + '" title="' + L.down + '" aria-label="' + L.down + '"' + (i === S.zones.length - 1 ? ' disabled' : '') + '>↓</button>' +
+      '<button class="ib del" data-act="del" data-i="' + i + '" title="' + L.del + '" aria-label="' + L.del + '"' + (S.zones.length === 1 ? ' disabled' : '') + '>✕</button></div>' +
+      '<div class="zrow">' +
+      '<div><label>' + L.zName + '</label><input data-f="name" data-i="' + i + '" value="' + esc(z.name) + '"></div>' +
+      '<div><label>' + L.zNote + '</label><input data-f="note" data-i="' + i + '" value="' + esc(z.note) + '"></div>' +
+      '<div><label>' + L.zSeats + '</label><input type="number" min="0" max="200" data-f="seats" data-i="' + i + '" value="' + z.seats + '"></div>' +
+      '<div><label>' + L.zOutlet + '</label><input type="number" min="0" max="200" data-f="outlet" data-i="' + i + '" value="' + z.outlet + '"></div>' +
+      '</div></div>';
+  }).join('');
+}
+
+function layout(){
+  var n = 1, out = [];
+  S.zones.forEach(function(z){
+    var c = clampInt(z.seats, 0, 200, 0); if (!c) return;
+    var o = Math.min(clampInt(z.outlet, 0, 200, 0), c);
+    out.push({ name: z.name || '-', note: z.note || '', from: n, to: n + c - 1, outlet: o ? [n, n + o - 1] : [0, 0] });
+    n += c;
+  });
+  return out;
+}
+
+function genCode(Z){
+  var w1 = 0, w2 = 0;
+  Z.forEach(function(z){ w1 = Math.max(w1, jsq(z.name).length); w2 = Math.max(w2, jsq(z.note).length); });
+  function pad(s, w){ while (s.length < w) s += ' '; return s; }
+  var lines = Z.map(function(z, i){
+    return '  { name: ' + pad(jsq(z.name) + ',', w1 + 1) + ' note: ' + pad(jsq(z.note) + ',', w2 + 1) + ' from: ' + pad(z.from + ',', 4) + ' to: ' + pad(z.to + ',', 4) + ' outlet: [' + z.outlet[0] + ', ' + z.outlet[1] + '] }' + (i < Z.length - 1 ? ',' : '');
+  });
+  return '// ===== 설정 시작 (SETTINGS START) =====\n' +
+    "// tools/seat-editor.html 에서 만든 설정을 이 줄과 '설정 끝' 줄 사이에 통째로 붙여넣으세요.\n" +
+    'const CAFE_NAME = ' + jsq(S.cafe || '우리 카페') + ';   // 카페 이름\n' +
+    'const STAY_MIN = ' + clampInt(S.stay, 10, 720, 90) + ';            // 퇴장을 안 눌러도 이 시간(분)이 지나면 빈자리로\n' +
+    'const CALM = ' + (clampInt(S.calm, 1, 99, 40) / 100) + ', BUSY = ' + (clampInt(S.busy, 2, 100, 75) / 100) + ';  // 한산 / 혼잡 기준\n\n' +
+    '// 좌석 배치: from~to = 좌석 번호 범위, outlet = 콘센트가 있는 번호 범위 (없으면 [0, 0])\n' +
+    'const ZONES = [\n' + lines.join('\n') + '\n];\n' +
+    '// ===== 설정 끝 (SETTINGS END) =====';
+}
+
+function render(){
+  var L = T[lang], Z = layout();
+  var total = Z.length ? Z[Z.length - 1].to : 0;
+  var outs = Z.reduce(function(a, z){ return a + (z.outlet[0] ? z.outlet[1] - z.outlet[0] + 1 : 0); }, 0);
+  $('sum').innerHTML = '<div><b>' + total + '</b><span>' + L.total + '</span></div><div><b>' + outs + '</b><span>' + L.outlets + '</span></div><div><b>' + Z.length + '</b><span>' + L.zcount + '</span></div>';
+  var h = '<h3>' + esc(S.cafe || '우리 카페') + '</h3><div class="sub">' + L.sub.replace('{n}', total).replace('{m}', clampInt(S.stay, 10, 720, 90)) + '</div>' +
+    '<div class="lv">' + L.now + '<b>' + L.calmWord + '</b>0명 사용 중 · 빈자리 ' + total + '석</div><div class="box">';
+  Z.forEach(function(z){
+    var cells = '';
+    for (var k = z.from; k <= z.to; k++) cells += '<div class="s">' + k + (k >= z.outlet[0] && k <= z.outlet[1] ? '<small>⚡</small>' : '') + '</div>';
+    h += '<div class="zh"><span><b>' + esc(z.name) + '</b>' + (z.note ? ' · ' + esc(z.note) : '') + '</span><span>' + (z.to - z.from + 1) + '/' + (z.to - z.from + 1) + ' 빈자리</span></div><div class="seats">' + cells + '</div>';
+  });
+  $('pv').innerHTML = h + '</div>';
+  var err = '';
+  if (clampInt(S.busy, 2, 100, 75) <= clampInt(S.calm, 1, 99, 40)) err = L.errBusy;
+  if (!Z.length) err = L.errZone;
+  $('out').textContent = err ? '⚠ ' + err : genCode(Z);
+  $('copy').disabled = !!err;
+  save();
+}
+
+function bindBasics(){
+  $('cafe').value = S.cafe; $('stay').value = S.stay; $('calm').value = S.calm; $('busy').value = S.busy;
+  ['cafe', 'stay', 'calm', 'busy'].forEach(function(k){ $(k).oninput = function(){ S[k] = k === 'cafe' ? this.value : this.value; render(); }; });
+}
+
+$('zones').addEventListener('input', function(e){
+  var f = e.target.getAttribute('data-f'); if (!f) return;
+  var z = S.zones[+e.target.getAttribute('data-i')];
+  z[f] = (f === 'seats' || f === 'outlet') ? clampInt(e.target.value, 0, 200, 0) : e.target.value;
+  render();
+});
+$('zones').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-act]'); if (!b) return;
+  var i = +b.getAttribute('data-i'), a = b.getAttribute('data-act'), z = S.zones;
+  if (a === 'up' && i > 0) z.splice(i - 1, 0, z.splice(i, 1)[0]);
+  if (a === 'down' && i < z.length - 1) z.splice(i + 1, 0, z.splice(i, 1)[0]);
+  if (a === 'del' && z.length > 1) z.splice(i, 1);
+  renderZones(); render();
+});
+$('add').onclick = function(){ S.zones.push({ name: lang === 'ko' ? '새 구역' : 'New zone', note: '', seats: 4, outlet: 0 }); renderZones(); render(); };
+$('copy').onclick = function(){
+  var t = $('out').textContent, b = this;
+  function ok(){ b.textContent = T[lang].copied; setTimeout(function(){ b.textContent = T[lang].copy; }, 1800); }
+  function fb(){ var r = document.createRange(); r.selectNodeContents($('out')); var s = getSelection(); s.removeAllRanges(); s.addRange(r); try { document.execCommand('copy'); ok(); } catch (e) {} }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, fb); else fb();
+};
+$('impgo').onclick = function(){
+  var src = $('imp').value, L = T[lang];
+  function str(re){ var m = src.match(re); return m ? m[1].replace(/\\'/g, "'") : null; }
+  var zm = src.match(/const\s+ZONES\s*=\s*\[([\s\S]*?)\];/);
+  if (!zm) { $('imperr').textContent = L.importErr; return; }
+  var zones = [], re = /\{\s*name:\s*'((?:[^'\\]|\\.)*)'\s*,\s*note:\s*'((?:[^'\\]|\\.)*)'\s*,\s*from:\s*(\d+)\s*,\s*to:\s*(\d+)\s*,\s*outlet:\s*\[\s*(\d+)\s*,\s*(\d+)\s*\]\s*\}/g, m;
+  while ((m = re.exec(zm[1]))) {
+    var from = +m[3], to = +m[4], o1 = +m[5], o2 = +m[6];
+    zones.push({ name: m[1].replace(/\\'/g, "'"), note: m[2].replace(/\\'/g, "'"), seats: to - from + 1, outlet: o1 ? Math.max(0, Math.min(to, o2) - Math.max(from, o1) + 1) : 0 });
+  }
+  if (!zones.length) { $('imperr').textContent = L.importErr; return; }
+  $('imperr').textContent = '';
+  S.zones = zones;
+  var c = str(/const\s+CAFE_NAME\s*=\s*'((?:[^'\\]|\\.)*)'/); if (c !== null) S.cafe = c;
+  var st = src.match(/const\s+STAY_MIN\s*=\s*(\d+)/); if (st) S.stay = +st[1];
+  var cb = src.match(/CALM\s*=\s*([\d.]+)\s*,\s*BUSY\s*=\s*([\d.]+)/); if (cb) { S.calm = Math.round(+cb[1] * 100); S.busy = Math.round(+cb[2] * 100); }
+  bindBasics(); renderZones(); render();
+};
+$('lk').onclick = function(){ lang = 'ko'; applyLang(); renderZones(); render(); };
+$('le').onclick = function(){ lang = 'en'; applyLang(); renderZones(); render(); };
+
+applyLang(); bindBasics(); renderZones(); render();
+</script>
+</body>
+</html>

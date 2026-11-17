@@ -2,7 +2,9 @@
 
 [한국어](커스터마이즈.md) | **English**
 
-Everything is at the top of `apps-script/Code.gs`. After editing, **save → Deploy → Manage deployments → ✏️ → Version: New version → Deploy** so guests see the change.
+> **Easiest way**: open [`tools/seat-editor.html`](../tools/seat-editor.html) (seat layout editor), build the layout by clicking, then **Copy** and paste it over everything from the `// ===== 설정 시작 (SETTINGS START)` line to the `// ===== 설정 끝 (SETTINGS END)` line in `Code.gs`. You can load your current settings into the editor with *Load existing settings*. The rest of this page is for editing the code by hand.
+
+Everything is between `SETTINGS START` and `SETTINGS END` at the top of `apps-script/Code.gs`. After editing, **save → Deploy → Manage deployments → ✏️ → Version: New version → Deploy** so guests see the change.
 
 ## 1. Cafe name
 

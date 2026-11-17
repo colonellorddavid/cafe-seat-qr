@@ -40,7 +40,16 @@ Full step-by-step instructions: **[docs/SETUP_EN.md](docs/SETUP_EN.md)**. An ill
 
 ## Make it yours
 
-Cafe name, seat layout, auto-checkout time and crowd thresholds are a few lines at the top of `Code.gs`. See **[docs/CUSTOMIZE_EN.md](docs/CUSTOMIZE_EN.md)**.
+Every cafe has a different floor plan. Open **[`tools/seat-editor.html`](tools/seat-editor.html)** (seat layout editor, English/Korean) to change it without touching code:
+
+- Add, delete and reorder zones (window bar, 2-seat tables, rooftop…)
+- Enter the number of seats and outlet seats per zone; seat numbers are assigned automatically
+- Cafe name, auto check-out time, calm / busy thresholds
+- A live preview of the guest page; when done, click **Copy** and paste over the `SETTINGS START` … `SETTINGS END` block in `Code.gs`
+
+<img src="docs/images/seat-editor.png" width="720" alt="Seat layout editor">
+
+To edit the code by hand instead, see **[docs/CUSTOMIZE_EN.md](docs/CUSTOMIZE_EN.md)**.
 
 After editing the code, publish it with **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**. Choosing *New deployment* instead creates a new URL, and your printed QR codes would stop matching.
 
@@ -68,6 +77,7 @@ docs/CUSTOMIZE_EN.md      English customization guide
 docs/설치가이드.html        Illustrated setup guide (Korean)
 docs/커스터마이즈.md        Customization guide (Korean)
 docs/images/              Screenshots
+tools/seat-editor.html    Seat layout editor (offline)
 tools/qr-maker.html       Make the three QR codes (offline)
 tools/qrcode.js           QR library (Kazuhiko Arase, MIT)
 ```

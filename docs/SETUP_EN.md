@@ -16,7 +16,7 @@ You do not need a Google Form. The code creates a tab called **좌석기록** (s
 1. In the sheet, open **Extensions → Apps Script** (확장 프로그램 → Apps Script).
 2. A code editor opens with `function myFunction() {}`. Select everything (**Ctrl+A**) and delete it.
 3. Copy the whole of [`apps-script/Code.gs`](../apps-script/Code.gs) and paste it (**Ctrl+V**).
-4. Change `CAFE_NAME` at the top to your cafe's name (optional; you can do it later).
+4. Change `CAFE_NAME` at the top to your cafe's name (optional). To match your seat layout, use [`tools/seat-editor.html`](../tools/seat-editor.html) and paste its output between `SETTINGS START` and `SETTINGS END`.
 5. Click the **💾 Save** icon (or **Ctrl+S**).
 
 ## 3. Deploy as a web app
