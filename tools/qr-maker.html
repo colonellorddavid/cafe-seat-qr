@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR 만들기</title>
+<style>
+:root{--bg:#F3F5F2;--card:#fff;--fg:#1C2420;--muted:#5D6A63;--line:#D6DDD5;--accent:#1F6B57}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141A17;--card:#1C2420;--fg:#E7ECE9;--muted:#9BA8A1;--line:#33403A;--accent:#5CC0A0}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.55}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:24px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 18px}
+.form{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px}
+label{font-weight:600;font-size:14px}
+input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:var(--card);color:var(--fg)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button{border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.err{color:#C0392B;font-weight:600;min-height:1.2em}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:20px}
+.card{background:#fff;color:#1C2420;border:1px solid #D6DDD5;border-radius:16px;padding:22px 18px;text-align:center;break-inside:avoid}
+.card h2{margin:0;font-size:24px}
+.card p{margin:4px 0 12px;color:#5D6A63;font-size:14px}
+.card .qr svg{width:100%;max-width:240px;height:auto}
+.card .where{font-size:12px;color:#5D6A63;margin-top:8px}
+.card .cafe{font-size:13px;color:#1F6B57;font-weight:700}
+@media print{body{background:#fff}.form,.sub,h1,.noprint{display:none}.cards{grid-template-columns:1fr 1fr}.card{border:1px solid #999}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>QR 만들기</h1>
+<p class="sub">배포한 웹 앱 주소(/exec로 끝나는 주소)를 붙여넣으면 입장, 퇴장, 좌석 현황 QR 세 장이 만들어집니다. 인터넷 없이도 동작하고, 주소는 이 컴퓨터 밖으로 보내지 않아요.</p>
+<div class="form">
+  <label for="url">웹 앱 주소</label>
+  <input id="url" placeholder="https://script.google.com/macros/s/..../exec" autocomplete="off">
+  <label for="cafe">카페 이름 (QR 카드에 표시, 선택)</label>
+  <input id="cafe" placeholder="예: 우리 카페">
+  <div class="err" id="err"></div>
+  <div class="row"><button id="go">QR 만들기</button><button class="ghost" id="print" hidden>인쇄하기</button></div>
+</div>
+<div class="cards" id="cards"></div>
+<p class="sub noprint" id="hint" hidden>QR 위에서 마우스 오른쪽 클릭 → "이미지를 다른 이름으로 저장"은 SVG라 안 될 수 있어요. 인쇄하기 → "PDF로 저장"을 쓰면 편합니다.</p>
+</div>
+<script src="qrcode.js"></script>
+<script>
+var KINDS = [
+  { q: '?p=in',  title: '입장',      desc: 'QR을 찍고 빈자리를 눌러 앉으세요', where: '테이블 · 입구에 붙이기' },
+  { q: '?p=out', title: '퇴장',      desc: '나가실 때 찍고 내 자리를 비워주세요', where: '출구 · 반납대에 붙이기' },
+  { q: '',       title: '좌석 현황', desc: '빈자리와 혼잡도를 실시간으로 확인하세요', where: '홈페이지 · SNS · 매장 밖 안내판' }
+];
+function qrSvg(text){ var qr = qrcode(0, 'M'); qr.addData(text); qr.make(); return qr.createSvgTag({ cellSize: 6, margin: 4, scalable: true }); }
+function esc(s){ return s.replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
+document.getElementById('go').onclick = function(){
+  var raw = document.getElementById('url').value.trim(), err = document.getElementById('err');
+  var base = raw.split('?')[0].split('#')[0];
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(base)) {
+    err.textContent = '주소가 https://script.google.com/macros/s/…/exec 모양인지 확인해 주세요.';
+    return;
+  }
+  err.textContent = '';
+  var cafe = esc(document.getElementById('cafe').value.trim());
+  document.getElementById('cards').innerHTML = KINDS.map(function(k){
+    return '<div class="card">' + (cafe ? '<div class="cafe">' + cafe + '</div>' : '') + '<h2>' + k.title + '</h2><p>' + k.desc + '</p><div class="qr">' + qrSvg(base + k.q) + '</div><div class="where">' + k.where + '</div></div>';
+  }).join('');
+  document.getElementById('print').hidden = false;
+  document.getElementById('hint').hidden = false;
+};
+document.getElementById('print').onclick = function(){ window.print(); };
+</script>
+</body>
+</html>

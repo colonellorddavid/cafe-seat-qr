@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>좌석 체크인 설치</title>
+<style>
+:root{--bg:#F4F5F7;--card:#fff;--fg:#1F2328;--muted:#5F6670;--line:#DADCE0;--hi:#E8453C;--blue:#1A73E8;--purple:#673AB7;--green:#188038;--soft:#FFF4E5}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171A;--card:#1F2226;--fg:#E8EAED;--muted:#9AA0A6;--line:#3C4043;--soft:#3A2F1C}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.6;font-size:16px}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:26px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 20px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.toc a{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;color:var(--fg);text-decoration:none;font-size:14px}
+section.part{margin-bottom:40px}
+.part>h2{font-size:21px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.badge{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;color:#fff;font-size:15px;flex:none}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:14px}
+.step h3{margin:0 0 6px;font-size:17px}
+.step p{margin:6px 0;overflow-wrap:anywhere}
+.n{display:inline-block;min-width:24px;height:24px;border-radius:6px;background:var(--fg);color:var(--card);text-align:center;font-size:13px;line-height:24px;margin-right:6px;padding:0 4px}
+.tip{background:var(--soft);border-radius:10px;padding:10px 14px;font-size:14px;margin-top:10px}
+/* mock screen */
+.scr{margin-top:12px;border:1px solid #c8cbd0;border-radius:10px;overflow:hidden;background:#fff;color:#202124;font-size:13px;box-shadow:0 2px 8px rgb(0 0 0/.08)}
+.bar{background:#ECEEF1;padding:7px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #d5d8dc}
+.dot{width:10px;height:10px;border-radius:50%;background:#d0d3d8}
+.url{flex:1;background:#fff;border-radius:6px;padding:3px 10px;color:#5f6368;font-size:12px;margin-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.body{padding:14px;position:relative}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sp{flex:1}
+.btn{display:inline-block;border-radius:6px;padding:6px 14px;font-weight:600;font-size:13px;border:1px solid #dadce0;background:#fff;color:#202124}
+.btn.blue{background:#1A73E8;color:#fff;border-color:#1A73E8}
+.btn.purple{background:#673AB7;color:#fff;border-color:#673AB7}
+.hl{outline:3px solid var(--hi);outline-offset:3px;border-radius:6px;position:relative}
+.click{position:relative}
+.click::after{content:"여기 클릭";position:absolute;top:-30px;left:50%;transform:translateX(-50%);background:var(--hi);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;white-space:nowrap;z-index:2}
+.formhead{border-top:8px solid #673AB7;border-radius:8px;background:#fff;border-left:1px solid #dadce0;border-right:1px solid #dadce0;border-bottom:1px solid #dadce0;padding:12px 14px;margin-bottom:10px}
+.q{border:1px solid #dadce0;border-left:5px solid #4285F4;border-radius:8px;padding:12px 14px;background:#fff}
+.input{border-bottom:1px solid #9aa0a6;padding:4px 0;color:#5f6368;min-width:160px;flex:1}
+.sel{border:1px solid #dadce0;border-radius:6px;padding:5px 10px;background:#fff}
+.menu{position:relative;display:inline-block;background:#fff;border:1px solid #dadce0;border-radius:6px;box-shadow:0 4px 12px rgb(0 0 0/.15);padding:4px 0;min-width:170px}
+.menu div{padding:6px 14px}
+.menu div.on{background:#FDECEA;font-weight:700}
+.tabs{display:flex;justify-content:center;gap:24px;border-bottom:1px solid #dadce0;margin:-14px -14px 12px;padding:8px 0 0;background:#fff}
+.tabs span{padding:6px 4px 8px;color:#5f6368;font-weight:600}
+.tabs span.on{color:#673AB7;border-bottom:3px solid #673AB7}
+.gs{display:grid;grid-template-columns:30px repeat(4,1fr);font-size:12px;border-top:1px solid #e0e0e0;border-left:1px solid #e0e0e0}
+.gs div{border-right:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;padding:3px 6px;height:24px;overflow:hidden;white-space:nowrap}
+.gs .h{background:#F8F9FA;color:#5f6368;text-align:center}
+.menubar{display:flex;gap:14px;font-size:13px;padding:4px 0 10px;flex-wrap:wrap}
+.code{background:#fff;border:1px solid #e0e0e0;border-radius:6px;font-family:ui-monospace,Consolas,monospace;font-size:12px;padding:10px;line-height:1.5}
+.code .del{text-decoration:line-through;color:#c5221f}
+.side{display:flex;gap:0}
+.side .l{width:120px;background:#F8F9FA;border-right:1px solid #e0e0e0;padding:8px;font-size:12px;color:#5f6368}
+.dlg{border:1px solid #dadce0;border-radius:10px;box-shadow:0 6px 20px rgb(0 0 0/.18);padding:14px;max-width:440px;margin:0 auto;background:#fff}
+.dlg h4{margin:0 0 10px;font-size:15px}
+.field{border:1px solid #dadce0;border-radius:6px;padding:6px 10px;margin:4px 0 10px}
+.lbl{font-size:12px;color:#5f6368}
+.warn{text-align:center}
+.warn .ic{font-size:36px}
+a.lnk{color:#1A73E8;text-decoration:underline}
+.copybox{position:relative;margin-top:10px}
+.copybox pre{background:#0F1419;color:#E6E1CF;padding:14px;border-radius:10px;overflow:auto;max-height:260px;font-size:12px;margin:0}
+.copybtn{position:absolute;top:8px;right:8px;background:var(--blue);color:#fff;border:0;border-radius:6px;padding:6px 12px;font-weight:700;cursor:pointer;font-size:13px}
+.menu .click::after{top:50%;left:auto;right:-72px;transform:translateY(-50%)}
+.done{background:#E6F4EA;color:#137333;border-radius:12px;padding:16px;font-weight:600}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .done{background:#1E3A2A;color:#81C995}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>QR 좌석 체크인 설치하기</h1>
+<p class="sub">그림 속 <b style="color:var(--hi)">빨간 테두리</b>가 누를 곳입니다. 구글 계정 하나로 20분이면 끝나요. 비용은 들지 않습니다.</p>
+<div class="toc"><a href="#p1">① 시트 만들기</a><a href="#p2">② 코드 붙여넣기</a><a href="#p3">③ 웹 앱 배포</a><a href="#p4">④ QR 만들기</a><a href="#p5">⑤ 확인과 운영</a></div>
+<section class="part" id="p1">
+<h2><span class="badge" style="background:var(--green)">1</span>구글 시트 만들기</h2>
+<div class="step">
+<h3><span class="n">1-1</span>새 스프레드시트</h3>
+<p>카페 사장님 구글 계정으로 로그인한 크롬에서 <a class="lnk" href="https://sheets.new" target="_blank">sheets.new</a> 를 여세요. 빈 시트가 바로 만들어집니다. 왼쪽 위 제목을 <b>"우리 카페 좌석"</b>처럼 바꿔 두세요.</p>
+<div class="scr"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">docs.google.com/spreadsheets/d/…/edit</span></div>
+<div class="body"><div class="row" style="font-size:15px;margin-bottom:8px"><span style="color:#188038;font-size:18px">▦</span> <span class="hl" style="padding:0 6px">우리 카페 좌석</span></div>
+<div class="gs"><div class="h"></div><div class="h">A</div><div class="h">B</div><div class="h">C</div><div class="h">D</div>
+<div class="h">1</div><div></div><div></div><div></div><div></div><div class="h">2</div><div></div><div></div><div></div><div></div></div></div></div>
+<div class="tip">💡 구글 폼은 필요 없어요. 손님 기록은 코드가 이 시트 안에 <b>좌석기록</b> 탭을 만들어 저장합니다.</div>
+</div>
+</section>
+<!-- PART 3 -->
+<section class="part" id="p2">
+<h2><span class="badge" style="background:#F9AB00">2</span>시트에 코드 붙여넣기</h2>
+
+<div class="step">
+<h3><span class="n">2-1</span>확장 프로그램 → Apps Script</h3>
+<p>1단계에서 만든 <b>구글 시트</b> 화면 위쪽 메뉴에서 <b>확장 프로그램</b> → <b>Apps Script</b>를 누르세요.</p>
+<div class="scr"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">docs.google.com/spreadsheets/d/…</span></div>
+<div class="body">
+<div class="row" style="font-size:15px;margin-bottom:2px"><span style="color:#188038;font-size:18px">▦</span> 우리 카페 좌석</div>
+<div class="menubar"><span>파일</span><span>수정</span><span>보기</span><span>삽입</span><span>서식</span><span>데이터</span><span>도구</span><span class="hl" style="padding:0 4px;font-weight:700">확장 프로그램</span><span>도움말</span></div>
+<div style="position:relative">
+<div class="gs"><div class="h"></div><div class="h">A</div><div class="h">B</div><div class="h">C</div><div class="h">D</div>
+<div class="h">1</div><div></div><div></div><div></div><div></div>
+<div class="h">2</div><div></div><div></div><div></div><div></div>
+<div class="h">3</div><div></div><div></div><div></div><div></div></div>
+<div class="menu" style="position:absolute;top:-6px;left:46%"><div>부가기능 ▸</div><div>매크로 ▸</div><div class="on click">Apps Script</div><div>AppSheet ▸</div></div>
+</div></div></div>
+</div>
+
+<div class="step">
+<h3><span class="n">2-2</span>원래 있던 코드 지우고 붙여넣기 → 저장</h3>
+<p>새 탭에 코드 편집기가 열리고 <code>function myFunction() { }</code>이 들어 있어요. <b>Ctrl+A</b>로 전부 선택해서 지우고, 아래 <b>복사</b> 버튼으로 복사한 코드를 <b>Ctrl+V</b>로 붙여넣으세요. 그다음 <b>💾 저장 아이콘</b>(또는 Ctrl+S)을 누르세요.</p>
+<div class="scr"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">script.google.com/…/edit</span></div>
+<div class="body">
+<div class="row" style="margin-bottom:10px"><b>제목 없는 프로젝트</b><span class="sp"></span><span class="btn blue">배포 ▾</span></div>
+<div class="side"><div class="l">파일 +<br><b style="color:#202124">Code.gs</b><br><br>라이브러리 +<br>서비스 +</div>
+<div style="flex:1;padding-left:10px"><div class="row" style="margin-bottom:6px;color:#5f6368"><span>↶ ↷</span><span class="click"><span class="hl" style="padding:0 6px">💾</span></span><span>▷ 실행</span><span>디버그</span></div>
+<div class="code"><span class="del">function myFunction() {<br>&nbsp;&nbsp;<br>}</span><br><span style="color:#188038">→ 지우고 아래 코드를 붙여넣기</span></div></div></div>
+</div></div>
+<div class="copybox"><button class="copybtn" id="cb">복사</button><pre id="code">/**
+ * cafe-seat-qr · QR 좌석 체크인 (구글 Apps Script 웹 앱 하나로 동작)
+ * 설치 방법: README.md / docs/설치가이드.html
+ *
+ *   .../exec        → 좌석 현황 (발표 화면용, 5초마다 자동 갱신)
+ *   .../exec?p=in   → 입장: 빈자리를 눌러 앉기
+ *   .../exec?p=out  → 퇴장: 내 자리를 눌러 나가기
+ *
+ * 기록은 이 스프레드시트의 &#x27;좌석기록&#x27; 시트에 자동으로 쌓입니다 (없으면 자동 생성).
+ * 발표 직전 초기화: 위쪽 함수 목록에서 clearLog 를 고르고 ▷ 실행.
+ */
+const CAFE_NAME = &#x27;우리 카페&#x27;;   // ← 카페 이름으로 바꾸세요
+const STAY_MIN = 90;            // 퇴장을 안 눌러도 이 시간(분)이 지나면 빈자리로
+const CALM = 0.4, BUSY = 0.75;  // 40% 미만 한산, 75% 이상 혼잡
+const LOG = &#x27;좌석기록&#x27;;
+
+// 좌석 배치 ← 매장에 맞게 바꾸세요 (docs/커스터마이즈.md)
+// from~to: 좌석 번호 범위, outlet: 콘센트가 있는 번호 범위 (없으면 [0, 0])
+const ZONES = [
+  { name: &#x27;창가 바&#x27;, note: &#x27;조용함&#x27;,    from: 1,  to: 10, outlet: [1, 10] },
+  { name: &#x27;2인석&#x27;,   note: &#x27;보통&#x27;,      from: 11, to: 26, outlet: [11, 18] },
+  { name: &#x27;4인석&#x27;,   note: &#x27;대화 많음&#x27;, from: 27, to: 38, outlet: [27, 30] },
+  { name: &#x27;소파&#x27;,    note: &#x27;대화 많음&#x27;, from: 39, to: 40, outlet: [0, 0] }
+];
+const SEATS = ZONES.reduce(function (n, z) { return n + (z.to - z.from + 1); }, 0);
+
+function doGet(e) {
+  const p = (e &amp;&amp; e.parameter &amp;&amp; e.parameter.p) || &#x27;view&#x27;;
+  const mode = (p === &#x27;in&#x27; || p === &#x27;out&#x27;) ? p : &#x27;view&#x27;;
+  const boot = {
+    mode: mode, cafe: CAFE_NAME, zones: ZONES, seats: SEATS, stay: STAY_MIN,
+    url: ScriptApp.getService().getUrl(), state: getState()
+  };
+  const json = JSON.stringify(boot).replace(/&lt;/g, &#x27;\\u003c&#x27;);
+  const html = PAGE.replace(&#x27;__BOOT__&#x27;, function () { return json; });
+  const title = mode === &#x27;in&#x27; ? &#x27;입장&#x27; : mode === &#x27;out&#x27; ? &#x27;퇴장&#x27; : &#x27;좌석 현황&#x27;;
+  return HtmlService.createHtmlOutput(html)
+    .setTitle(CAFE_NAME + &#x27; &#x27; + title)
+    .addMetaTag(&#x27;viewport&#x27;, &#x27;width=device-width, initial-scale=1&#x27;);
+}
+
+function sheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(LOG);
+  if (!sh) { sh = ss.insertSheet(LOG); sh.appendRow([&#x27;시간&#x27;, &#x27;좌석&#x27;, &#x27;구분&#x27;]); }
+  return sh;
+}
+
+// 지금 앉아 있는 자리 = 마지막 기록이 &#x27;입장&#x27;이고 STAY_MIN 안에 들어온 자리
+function getState() {
+  const rows = sheet_().getDataRange().getValues().slice(1);
+  const now = new Date(), since = now.getTime() - STAY_MIN * 60000;
+  const last = {};
+  rows.forEach(function (r) {
+    if (r[0] instanceof Date) last[Number(r[1])] = { t: r[0].getTime(), a: r[2] };
+  });
+  const taken = [];
+  Object.keys(last).forEach(function (s) {
+    if (last[s].a === &#x27;입장&#x27; &amp;&amp; last[s].t &gt; since) taken.push(Number(s));
+  });
+  const ratio = taken.length / SEATS;
+  return {
+    taken: taken,
+    used: taken.length,
+    level: ratio &lt; CALM ? &#x27;calm&#x27; : ratio &lt; BUSY ? &#x27;mid&#x27; : &#x27;busy&#x27;,
+    time: Utilities.formatDate(now, &#x27;Asia/Seoul&#x27;, &#x27;HH:mm:ss&#x27;)
+  };
+}
+
+function record_(seat, action) {
+  seat = Number(seat);
+  if (!(seat &gt;= 1 &amp;&amp; seat &lt;= SEATS)) return { ok: false, msg: &#x27;없는 자리 번호예요.&#x27; };
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const st = getState();
+    const isTaken = st.taken.indexOf(seat) &gt;= 0;
+    if (action === &#x27;입장&#x27; &amp;&amp; isTaken) return { ok: false, msg: seat + &#x27;번은 방금 다른 분이 앉았어요. 다른 자리를 골라주세요.&#x27;, state: st };
+    if (action === &#x27;퇴장&#x27; &amp;&amp; !isTaken) return { ok: true, msg: seat + &#x27;번은 이미 빈자리예요.&#x27;, state: st };
+    sheet_().appendRow([new Date(), seat, action]);
+    SpreadsheetApp.flush();
+    return { ok: true, state: getState() };
+  } finally {
+    lock.releaseLock();
+  }
+}
+function checkIn(seat)  { return record_(seat, &#x27;입장&#x27;); }
+function checkOut(seat) { return record_(seat, &#x27;퇴장&#x27;); }
+
+// 발표 직전에 한 번 실행: 기록을 모두 지우고 제목 줄만 남김
+function clearLog() {
+  const sh = sheet_();
+  if (sh.getLastRow() &gt; 1) sh.deleteRows(2, sh.getLastRow() - 1);
+}
+
+const PAGE = `&lt;!doctype html&gt;
+&lt;html lang=&quot;ko&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;style&gt;
+:root{--bg:#F3F5F2;--card:#fff;--line:#D6DDD5;--fg:#1C2420;--muted:#5D6A63;--accent:#1F6B57;
+--calm:#2E8B57;--calm-bg:#E1F2E8;--mid:#B7791F;--mid-bg:#FBF0DC;--busy:#C0392B;--busy-bg:#F8E1DE;
+--free:#fff;--used:#9AA59F;--zone:#E8ECE7;--me:#2F6FE0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,&quot;Apple SD Gothic Neo&quot;,&quot;Malgun Gothic&quot;,sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 120px}
+h1{font-size:20px;margin:0}
+.sub{color:var(--muted);font-size:13px;margin:2px 0 14px}
+.banner{border-radius:14px;padding:14px 16px;margin-bottom:14px;font-weight:600}
+.banner.in{background:#E3EAFB;color:#1E3F8A}
+.banner.out{background:#FDEEE2;color:#8A3E12}
+.level{border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px}
+.level .big{font-size:48px;font-weight:800;line-height:1}
+.level .nums{display:flex;gap:22px;flex-wrap:wrap}
+.level .nums b{font-size:22px;display:block}
+.level .nums span{font-size:12px;color:var(--muted)}
+.calm{background:var(--calm-bg)}.calm .big{color:var(--calm)}
+.mid{background:var(--mid-bg)}.mid .big{color:var(--mid)}
+.busy{background:var(--busy-bg)}.busy .big{color:var(--busy)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px;border:1px solid var(--line)}
+.zone{margin-top:12px}
+.zone .zh{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.zone .zh b{font-size:14px}
+.seats{display:flex;flex-wrap:wrap;gap:6px;background:var(--zone);padding:8px;border-radius:12px}
+.seat{width:46px;height:46px;border-radius:9px;border:1px solid var(--line);background:var(--free);font-weight:700;font-size:14px;color:var(--fg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;cursor:default;font-family:inherit}
+.seat small{font-size:9px;line-height:1;color:#E07B00}
+.seat.taken{background:var(--used);border-color:var(--used);color:#fff}
+.seat.me{background:var(--me);border-color:var(--me);color:#fff}
+.seat.pick{outline:3px solid var(--fg);outline-offset:2px}
+.seat.can{cursor:pointer}
+.seat.can:hover{transform:translateY(-1px)}
+.seat:disabled{opacity:1}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgb(0 0 0/.08)}
+.bar .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bar .msg{flex:1;min-width:180px;font-weight:600}
+.btn{border:0;border-radius:10px;padding:12px 20px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;background:var(--accent);color:#fff}
+.btn.ghost{background:var(--zone);color:var(--fg)}
+.btn.warn{background:#C0392B}
+.btn:disabled{opacity:.5}
+.foot{color:var(--muted);font-size:12px;margin-top:10px}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--fg);color:#fff;padding:10px 16px;border-radius:10px;font-weight:600;z-index:9;max-width:92%;text-align:center}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+&lt;div class=&quot;wrap&quot;&gt;
+  &lt;h1 id=&quot;cafe&quot;&gt;&lt;/h1&gt;
+  &lt;div class=&quot;sub&quot; id=&quot;sub&quot;&gt;&lt;/div&gt;
+  &lt;div id=&quot;banner&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;level&quot; id=&quot;level&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;card&quot;&gt;
+    &lt;div class=&quot;legend&quot;&gt;&lt;span&gt;&lt;i&gt;&lt;/i&gt;빈자리&lt;/span&gt;&lt;span&gt;&lt;i style=&quot;background:var(--used);border-color:var(--used)&quot;&gt;&lt;/i&gt;사용 중&lt;/span&gt;&lt;span id=&quot;lgme&quot; hidden&gt;&lt;i style=&quot;background:var(--me);border-color:var(--me)&quot;&gt;&lt;/i&gt;내 자리&lt;/span&gt;&lt;span style=&quot;color:#E07B00&quot;&gt;⚡ 콘센트&lt;/span&gt;&lt;/div&gt;
+    &lt;div id=&quot;map&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;foot&quot; id=&quot;foot&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;bar&quot; id=&quot;bar&quot; hidden&gt;&lt;div class=&quot;in&quot;&gt;&lt;div class=&quot;msg&quot; id=&quot;barmsg&quot;&gt;&lt;/div&gt;&lt;span id=&quot;barbtns&quot;&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;script&gt;
+var B = __BOOT__;
+var S = B.state, pick = null, busy = false, mine = null;
+try { mine = Number(localStorage.getItem(&#x27;mySeat&#x27;)) || null; } catch (e) {}
+function saveMine(v){ mine = v; try { v ? localStorage.setItem(&#x27;mySeat&#x27;, v) : localStorage.removeItem(&#x27;mySeat&#x27;); } catch (e) {} }
+var LV = { calm: &#x27;한산&#x27;, mid: &#x27;보통&#x27;, busy: &#x27;혼잡&#x27; };
+function $(id){ return document.getElementById(id); }
+function isTaken(n){ return S.taken.indexOf(n) &gt;= 0; }
+function toast(t){ var d=document.createElement(&#x27;div&#x27;); d.className=&#x27;toast&#x27;; d.textContent=t; document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 2600); }
+
+function render(){
+  if (mine &amp;&amp; !isTaken(mine)) saveMine(null);   // 시간이 지나 자동 퇴장된 경우
+  if (pick &amp;&amp; B.mode === &#x27;in&#x27; &amp;&amp; isTaken(pick)) pick = null;
+  $(&#x27;cafe&#x27;).textContent = B.cafe;
+  $(&#x27;sub&#x27;).textContent = S.time + &#x27; 기준 · 좌석 &#x27; + B.seats + &#x27;석 · &#x27; + B.stay + &#x27;분 지나면 자동 퇴장&#x27;;
+  var bn = &#x27;&#x27;;
+  if (B.mode === &#x27;in&#x27;) bn = mine ? &#x27;&lt;div class=&quot;banner in&quot;&gt;&#x27; + mine + &#x27;번 자리에 앉아 계세요. 나갈 때 아래 [퇴장하기]를 눌러주세요.&lt;/div&gt;&#x27; : &#x27;&lt;div class=&quot;banner in&quot;&gt;빈자리(흰색)를 눌러 앉을 자리를 고르세요.&lt;/div&gt;&#x27;;
+  if (B.mode === &#x27;out&#x27;) bn = &#x27;&lt;div class=&quot;banner out&quot;&gt;&#x27; + (mine ? &#x27;아래 [퇴장하기]를 누르면 &#x27; + mine + &#x27;번 자리가 비워져요.&#x27; : &#x27;나가실 자리(회색)를 눌러주세요.&#x27;) + &#x27;&lt;/div&gt;&#x27;;
+  $(&#x27;banner&#x27;).innerHTML = bn;
+  var lv = $(&#x27;level&#x27;); lv.className = &#x27;level &#x27; + S.level;
+  lv.innerHTML = &#x27;&lt;div&gt;&lt;div style=&quot;font-size:12px;color:var(--muted)&quot;&gt;지금 매장 분위기&lt;/div&gt;&lt;div class=&quot;big&quot;&gt;&#x27; + LV[S.level] + &#x27;&lt;/div&gt;&lt;/div&gt;&#x27; +
+    &#x27;&lt;div class=&quot;nums&quot;&gt;&lt;div&gt;&lt;b&gt;&#x27; + S.used + &#x27;명&lt;/b&gt;&lt;span&gt;사용 중&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&#x27; + (B.seats - S.used) + &#x27;석&lt;/b&gt;&lt;span&gt;빈자리&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&#x27; + Math.round(S.used / B.seats * 100) + &#x27;%&lt;/b&gt;&lt;span&gt;좌석 사용률&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&#x27;;
+  $(&#x27;lgme&#x27;).hidden = !mine;
+  var h = &#x27;&#x27;;
+  B.zones.forEach(function (z) {
+    var free = 0, cells = &#x27;&#x27;;
+    for (var n = z.from; n &lt;= z.to; n++) {
+      var t = isTaken(n); if (!t) free++;
+      var cls = &#x27;seat&#x27; + (n === mine ? &#x27; me&#x27; : t ? &#x27; taken&#x27; : &#x27;&#x27;) + (n === pick ? &#x27; pick&#x27; : &#x27;&#x27;);
+      var can = (B.mode === &#x27;in&#x27; &amp;&amp; !t &amp;&amp; !mine) || (B.mode === &#x27;out&#x27; &amp;&amp; t &amp;&amp; !mine);
+      if (can) cls += &#x27; can&#x27;;
+      var out = (n &gt;= z.outlet[0] &amp;&amp; n &lt;= z.outlet[1]) ? &#x27;&lt;small&gt;⚡&lt;/small&gt;&#x27; : &#x27;&#x27;;
+      cells += &#x27;&lt;button class=&quot;&#x27; + cls + &#x27;&quot; data-n=&quot;&#x27; + n + &#x27;&quot;&#x27; + (can ? &#x27;&#x27; : &#x27; disabled&#x27;) + &#x27;&gt;&#x27; + n + out + &#x27;&lt;/button&gt;&#x27;;
+    }
+    h += &#x27;&lt;div class=&quot;zone&quot;&gt;&lt;div class=&quot;zh&quot;&gt;&lt;span&gt;&lt;b&gt;&#x27; + z.name + &#x27;&lt;/b&gt; · &#x27; + z.note + &#x27;&lt;/span&gt;&lt;span&gt;&#x27; + free + &#x27;/&#x27; + (z.to - z.from + 1) + &#x27; 빈자리&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;seats&quot;&gt;&#x27; + cells + &#x27;&lt;/div&gt;&lt;/div&gt;&#x27;;
+  });
+  $(&#x27;map&#x27;).innerHTML = h;
+  $(&#x27;foot&#x27;).textContent = B.mode === &#x27;view&#x27; ? &#x27;5초마다 자동으로 바뀝니다. 입장/퇴장은 QR을 찍어 주세요.&#x27; : &#x27;화면은 5초마다 자동으로 바뀝니다.&#x27;;
+  renderBar();
+}
+
+function renderBar(){
+  var bar = $(&#x27;bar&#x27;), msg = &#x27;&#x27;, btns = &#x27;&#x27;;
+  if (B.mode === &#x27;in&#x27;) {
+    if (mine) { msg = &#x27;내 자리: &#x27; + mine + &#x27;번&#x27;; btns = &#x27;&lt;button class=&quot;btn warn&quot; id=&quot;go-out&quot;&gt;퇴장하기&lt;/button&gt;&#x27;; }
+    else if (pick) { msg = pick + &#x27;번 자리에 앉을까요?&#x27;; btns = &#x27;&lt;button class=&quot;btn ghost&quot; id=&quot;cancel&quot;&gt;취소&lt;/button&gt; &lt;button class=&quot;btn&quot; id=&quot;go-in&quot;&gt;앉기&lt;/button&gt;&#x27;; }
+  } else if (B.mode === &#x27;out&#x27;) {
+    var s = mine || pick;
+    if (s) { msg = s + &#x27;번 자리에서 나갈까요?&#x27;; btns = (mine ? &#x27;&#x27; : &#x27;&lt;button class=&quot;btn ghost&quot; id=&quot;cancel&quot;&gt;취소&lt;/button&gt; &#x27;) + &#x27;&lt;button class=&quot;btn warn&quot; id=&quot;go-out&quot;&gt;퇴장하기&lt;/button&gt;&#x27;; }
+  }
+  bar.hidden = !msg;
+  $(&#x27;barmsg&#x27;).textContent = msg;
+  $(&#x27;barbtns&#x27;).innerHTML = btns;
+  if ($(&#x27;cancel&#x27;)) $(&#x27;cancel&#x27;).onclick = function(){ pick = null; render(); };
+  if ($(&#x27;go-in&#x27;)) $(&#x27;go-in&#x27;).onclick = function(){ send(&#x27;checkIn&#x27;, pick); };
+  if ($(&#x27;go-out&#x27;)) $(&#x27;go-out&#x27;).onclick = function(){ send(&#x27;checkOut&#x27;, mine || pick); };
+}
+
+function send(fn, seat){
+  if (busy || !seat) return; busy = true;
+  document.querySelectorAll(&#x27;.bar .btn&#x27;).forEach(function(b){ b.disabled = true; });
+  google.script.run.withSuccessHandler(function(r){
+    busy = false;
+    if (r.state) S = r.state;
+    if (fn === &#x27;checkIn&#x27; &amp;&amp; r.ok) { saveMine(seat); toast(seat + &#x27;번 입장 완료!&#x27;); }
+    if (fn === &#x27;checkOut&#x27; &amp;&amp; r.ok) { saveMine(null); toast(r.msg || (seat + &#x27;번 퇴장 완료. 감사합니다!&#x27;)); }
+    if (!r.ok) toast(r.msg);
+    pick = null; render();
+  }).withFailureHandler(function(e){
+    busy = false; toast(&#x27;연결이 잠깐 끊겼어요. 다시 눌러주세요.&#x27;); render();
+  })[fn](seat);
+}
+
+$(&#x27;map&#x27;).addEventListener(&#x27;click&#x27;, function(e){
+  var b = e.target.closest(&#x27;.seat.can&#x27;); if (!b) return;
+  pick = Number(b.getAttribute(&#x27;data-n&#x27;)); render();
+});
+
+function poll(){
+  if (busy) return;
+  google.script.run.withSuccessHandler(function(st){ if (!busy) { S = st; render(); } }).getState();
+}
+render();
+setInterval(poll, 5000);
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;`;
+</pre></div>
+<div class="tip">💡 맨 위 <code>CAFE_NAME</code>에 카페 이름을 넣으세요. 좌석 배치(<code>ZONES</code>) 바꾸는 법은 <code>docs/커스터마이즈.md</code>에 있어요. 처음엔 그대로 두고 동작부터 확인해도 됩니다.</div>
+</div>
+</section>
+<!-- PART 4 -->
+<section class="part" id="p3">
+<h2><span class="badge" style="background:var(--blue)">3</span>웹 앱으로 배포</h2>
+
+<div class="step">
+<h3><span class="n">3-1</span>배포 → 새 배포</h3>
+<p>코드 편집기 오른쪽 위 파란 <b>배포</b> 버튼 → <b>새 배포</b>를 누르세요.</p>
+<div class="scr"><div class="body">
+<div class="row"><b>제목 없는 프로젝트</b><span class="sp"></span><span class="btn blue hl">배포 ▾</span></div>
+<div class="row" style="justify-content:flex-end;margin-top:6px"><div class="menu"><div class="on">새 배포</div><div>배포 관리</div><div>배포 테스트</div></div></div>
+</div></div>
+</div>
+
+<div class="step">
+<h3><span class="n">3-2</span>톱니바퀴 → 웹 앱 고르고 설정</h3>
+<p>창 왼쪽 <b>유형 선택</b> 옆 <b>⚙ 톱니바퀴</b>를 누르고 <b>웹 앱</b>을 고르세요. 그다음 설정을 아래처럼 맞추고 <b>배포</b>를 누르세요.</p>
+<div class="scr"><div class="body" style="background:rgb(0 0 0/.35)">
+<div class="dlg"><h4>새 배포</h4>
+<div class="row" style="margin-bottom:10px"><span class="lbl">유형 선택</span><span class="hl" style="padding:0 6px">⚙</span><div class="menu" style="min-width:120px;margin-left:6px"><div class="on">웹 앱</div><div>API 실행 파일</div><div>부가기능</div></div></div>
+<div class="lbl">설명</div><div class="field" style="color:#9aa0a6">좌석 v1 (아무거나)</div>
+<div class="lbl">다음 사용자 인증 정보로 실행</div><div class="field hl">나 (내 이메일) ▾</div>
+<div class="lbl">액세스 권한이 있는 사용자</div><div class="field hl"><b>모든 사용자</b> ▾</div>
+<div class="row" style="justify-content:flex-end"><span class="btn">취소</span><span class="click"><span class="btn blue hl">배포</span></span></div></div>
+</div></div>
+<div class="tip">⚠️ <b>액세스 권한</b>은 꼭 <b>"모든 사용자"</b>여야 해요. "Google 계정이 있는 모든 사용자"나 "나만"으로 두면 손님 휴대폰에서 안 열립니다.</div>
+</div>
+
+<div class="step">
+<h3><span class="n">3-3</span>권한 승인 (처음 한 번만)</h3>
+<p><b>액세스 승인</b> → 내 구글 계정 선택 순서로 누르세요. 그러면 <b>"Google에서 확인하지 않은 앱"</b> 경고가 나오는데, 내가 만든 코드라서 그런 것이니 괜찮습니다.</p>
+<div class="scr"><div class="body">
+<div class="dlg warn"><div class="ic">⚠️</div><h4>Google에서 확인하지 않은 앱</h4>
+<p style="color:#5f6368;font-size:12px;margin:4px 0 10px">이 앱은 Google의 확인을 받지 않았습니다.</p>
+<div class="row" style="justify-content:space-between"><span class="click"><span class="hl" style="color:#5f6368;font-size:12px;padding:2px 6px">① 고급</span></span><span class="btn blue">안전한 페이지로 돌아가기</span></div>
+<p style="text-align:left;font-size:12px;margin-top:14px"><span class="hl" style="color:#1A73E8;text-decoration:underline;padding:2px 4px">② 제목 없는 프로젝트(으)로 이동(안전하지 않음)</span></p>
+</div>
+<div style="text-align:center;margin:10px 0;color:#5f6368">↓ 다음 화면</div>
+<div class="dlg"><h4>제목 없는 프로젝트에서 내 Google 계정에 액세스하려고 합니다</h4><p style="font-size:12px;color:#5f6368">• Google 스프레드시트 보기 및 관리</p>
+<div class="row" style="justify-content:flex-end"><span class="btn">취소</span><span class="btn blue hl">③ 허용</span></div></div>
+</div></div>
+<div class="tip">💡 코드는 이 시트 안의 <b>좌석기록</b> 탭만 읽고 씁니다. 다른 파일이나 메일은 건드리지 않아요.</div>
+</div>
+
+<div class="step">
+<h3><span class="n">3-4</span>웹 앱 URL 복사</h3>
+<p style="overflow-wrap:anywhere">"배포를 업데이트했습니다" 창이 뜨면 <b>웹 앱</b> 아래 주소 옆 <b>복사</b>를 누르세요. 주소는 <code>https://script.google.com/macros/s/…/exec</code> 모양이에요.</p>
+<div class="scr"><div class="body" style="background:rgb(0 0 0/.35)">
+<div class="dlg"><h4>새 배포 ✓</h4>
+<div class="lbl">배포 ID</div><div class="field" style="color:#9aa0a6">AKfycb…</div>
+<div class="lbl">웹 앱</div><div class="row"><div class="field" style="flex:1;margin:0;overflow:hidden;white-space:nowrap">https://script.google.com/macros/s/AKfy…/exec</div><span class="click"><span class="btn hl">복사</span></span></div>
+<div class="row" style="justify-content:flex-end;margin-top:10px"><span class="btn blue">완료</span></div></div>
+</div></div>
+<p style="overflow-wrap:anywhere">복사한 주소를 새 탭에 붙여넣어 보세요. <b>좌석 배치도와 "한산 · 0명"</b>이 보이면 배포 성공입니다. 시트 아래쪽에 <b>좌석기록</b> 탭도 자동으로 생겨요.</p>
+</div>
+</section>
+<section class="part" id="p4">
+<h2><span class="badge" style="background:var(--purple)">4</span>QR 세 장 만들기</h2>
+<div class="step">
+<p>저장소의 <code>tools/qr-maker.html</code>을 더블클릭해서 여세요. 3-4에서 복사한 웹 앱 주소를 붙여넣고 <b>QR 만들기</b>를 누르면 세 장이 나옵니다. <b>인쇄하기</b> → "PDF로 저장"으로 보관하거나 바로 인쇄하세요.</p>
+<img src="images/qr-maker.png" alt="QR 만들기 화면" style="width:100%;max-width:720px;border:1px solid var(--line);border-radius:12px;display:block;margin-top:10px">
+<table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:14px">
+<tr><th style="text-align:left;padding:6px;border-bottom:1px solid var(--line)">QR</th><th style="text-align:left;padding:6px;border-bottom:1px solid var(--line)">주소</th><th style="text-align:left;padding:6px;border-bottom:1px solid var(--line)">붙일 곳</th></tr>
+<tr><td style="padding:6px">입장</td><td style="padding:6px"><code>…/exec?p=in</code></td><td style="padding:6px">테이블, 입구</td></tr>
+<tr><td style="padding:6px">퇴장</td><td style="padding:6px"><code>…/exec?p=out</code></td><td style="padding:6px">출구, 반납대</td></tr>
+<tr><td style="padding:6px">좌석 현황</td><td style="padding:6px"><code>…/exec</code></td><td style="padding:6px">홈페이지, SNS, 매장 밖 안내판</td></tr>
+</table>
+</div>
+</section>
+<section class="part" id="p5">
+<h2><span class="badge" style="background:var(--hi)">5</span>휴대폰으로 확인하고 운영하기</h2>
+<div class="step">
+<h3><span class="n">5-1</span>손님이 보는 화면</h3>
+<p>입장 QR을 찍으면 왼쪽처럼 좌석 배치도가 나와요. 빈자리(흰색)를 누르고 <b>앉기</b>를 누르면 내 자리가 파란색이 됩니다. 나갈 때는 <b>퇴장하기</b>를 누르거나 퇴장 QR을 찍으면 돼요.</p>
+<div class="row" style="align-items:flex-start;gap:12px"><img src="images/checkin-pick.png" alt="자리 고르기" style="width:100%;max-width:220px;border:1px solid var(--line);border-radius:12px;display:block;margin-top:10px"><img src="images/checkin-done.png" alt="입장 완료" style="width:100%;max-width:220px;border:1px solid var(--line);border-radius:12px;display:block;margin-top:10px"><img src="images/checkout.png" alt="퇴장" style="width:100%;max-width:220px;border:1px solid var(--line);border-radius:12px;display:block;margin-top:10px"></div>
+</div>
+<div class="step">
+<h3><span class="n">5-2</span>운영 팁</h3>
+<ul>
+<li><b>기록 지우기</b>: Apps Script 편집기 위쪽 함수 목록에서 <code>clearLog</code>를 고르고 <b>▷ 실행</b>. 테스트 후나 영업 시작 전에 쓰세요.</li>
+<li><b>코드를 고친 뒤</b>: 저장만으로는 반영되지 않아요. <b>배포 → 배포 관리 → ✏️ → 버전: 새 버전 → 배포</b>. "새 배포"를 누르면 주소가 바뀌어 QR을 다시 만들어야 합니다.</li>
+<li><b>퇴장을 깜빡한 손님</b>: 90분(<code>STAY_MIN</code>)이 지나면 자동으로 빈자리가 돼요.</li>
+</ul>
+</div>
+<div class="step">
+<h3><span class="n">5-3</span>안 될 때</h3>
+<ul>
+<li><b>"Sorry, unable to open the file"</b>: 배포 관리 → ✏️ → 액세스 권한이 <b>"모든 사용자"</b>인지 확인하세요. "나만"이면 다른 사람은 열 수 없어요.</li>
+<li><b>본인 폰에서만 안 열림</b>: 구글 계정이 여러 개 로그인된 브라우저에서 생겨요. 시크릿 탭으로 열어 보세요.</li>
+<li><b>옛날 화면이 나옴</b>: 새 버전으로 배포하지 않은 경우예요. 5-2의 "코드를 고친 뒤"를 따라 하세요.</li>
+</ul>
+</div>
+</section>
+</div>
+<script>
+document.getElementById('cb').addEventListener('click',function(){
+  var t=document.getElementById('code').textContent,b=this;
+  function ok(){b.textContent='복사됨 ✓';setTimeout(function(){b.textContent='복사'},1800)}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,fallback)}else fallback();
+  function fallback(){var r=document.createRange();r.selectNodeContents(document.getElementById('code'));var s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy');ok()}catch(e){b.textContent='Ctrl+C 누르세요'}}
+});
+</script>
+</body>
+</html>
